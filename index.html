@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="efKuXzz8x2GCnef3ygoJ5U">
+<head data-page-node-id="a8eFWEMeioyILCZsiyam7F">
+<meta charset="UTF-8" data-page-node-id="PKEimQiTOtClx79Qet676a">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" data-page-node-id="DOhHU5VcbtimDv1Xu1zj6H">
+<title>2026年日历 · 滑动切换月份</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; padding: 16px; font-family: "PingFang SC","Microsoft YaHei",sans-serif;
+    background: #f5f6fa; color: #262626; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .card {
+    width: 100%; max-width: 440px; background: #fff; border-radius: 16px;
+    box-shadow: 0 4px 18px rgba(0,0,0,.08); overflow: hidden; margin-top: 12px;
+    user-select: none;
+  }
+  .top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 18px 10px;
+  }
+  .nav-btn {
+    width: 40px; height: 40px; border: none; border-radius: 50%;
+    background: #f0f2f5; color: #1677ff; font-size: 20px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: background .15s;
+  }
+  .nav-btn:active { background: #d6e4ff; }
+  .nav-btn:disabled { opacity: .3; cursor: default; background: #f0f2f5; color: #bbb; }
+  .title { font-size: 20px; font-weight: 700; letter-spacing: 1px; }
+  .sub { font-size: 12px; color: #aaa; text-align: center; margin-top: 2px; }
+  .subbar { padding-bottom: 10px; }
+  .viewport { width: 100%; overflow: hidden; touch-action: pan-y; }
+  .track { display: flex; width: 100%; transition: transform .32s cubic-bezier(.25,.8,.3,1); }
+  .track.no-anim { transition: none; }
+  .panel { flex: 0 0 100%; padding: 4px 18px 22px; }
+  table { width: 100%; border-collapse: collapse; }
+  th { font-size: 13px; color: #999; padding: 6px 0; font-weight: 600; }
+  td {
+    height: 46px; text-align: center; font-size: 15px; border-radius: 10px;
+    vertical-align: middle; color: #333; position: relative;
+  }
+  td.empty { background: transparent; }
+  th:nth-child(6), td:nth-child(6) { color: #fa8c16; }
+  th:nth-child(7), td:nth-child(7) { color: #fa8c16; }
+  td.weekend:not(.holiday):not(.workday) { background: #fff7e6; }
+  td.holiday { background: #fff1f0; color: #d4380d; font-weight: 600; }
+  td.holiday .hname { display:block; font-size:10px; line-height: 1; margin-top: 2px; }
+  td.workday { background: #fafafa; color: #8c8c8c; }
+  td.workday .mark { display:block; font-size:10px; line-height: 1; margin-top: 2px; }
+  td.today { outline: 2px solid #1677ff; outline-offset: -2px; }
+  .summary { width:100%; max-width:440px; background:#fff; border-radius:14px; box-shadow:0 2px 10px rgba(0,0,0,.05); padding:14px 18px; margin-top:14px; text-align:center; font-size:15px; line-height:1.7; }
+  .summary .num-red { color:#f5222d; font-weight:bold; font-size:16px; }
+
+  .bark-wrap { width:100%; max-width:440px; background:#fff; border-radius:14px; box-shadow:0 2px 10px rgba(0,0,0,.05); padding:12px 18px; margin-top:12px; }
+  .bark-row { display:flex; gap:8px; align-items:center; }
+  .bark-btn { padding:10px 14px; border:none; border-radius:8px; background:#ff7d00; color:#fff; cursor:pointer; font-size:13px; flex:1; }
+  .bark-edit-btn { padding:10px 12px; border:none; border-radius:8px; background:#1677ff; color:#fff; cursor:pointer; font-size:13px; }
+  .bark-tip { font-size:12px; color:#888; min-height:18px; margin-top:8px; word-break:break-all; }
+
+  .export-wrap { width:100%; max-width:440px; margin-top:12px; }
+  #exportBtn { width:100%; padding:12px; border:none; border-radius:14px; background:#1677ff; color:#fff; font-size:15px; cursor:pointer; }
+
+  .mask { position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; z-index:50; padding:20px; }
+  .mask.show { display:flex; }
+  .modal { background:#fff; border-radius:16px; width:100%; max-width:320px; padding:22px 20px; box-shadow:0 10px 40px rgba(0,0,0,.25); }
+  .m-date { font-size:18px; font-weight:700; text-align:center; }
+  .m-label { font-size:13px; color:#555; margin:18px 0 6px; }
+  .m-input { width:100%; padding:12px; font-size:18px; border:1px solid #d9d9d9; border-radius:10px; outline:none; box-sizing:border-box; text-align:center; }
+  .m-input:focus { border-color:#1677ff; }
+  .m-default { display:flex; align-items:center; justify-content:space-between; margin-top:14px; font-size:13px; color:#666; cursor:pointer; }
+  .switch { position:relative; display:inline-block; width:44px; height:24px; flex:none; }
+  .switch input { opacity:0; width:0; height:0; }
+  .slider { position:absolute; cursor:pointer; inset:0; background:#d9d9d9; border-radius:24px; transition:.2s; }
+  .slider::before { content:""; position:absolute; height:18px; width:18px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; box-shadow:0 1px 2px rgba(0,0,0,.2); }
+  .switch input:checked + .slider { background:#1677ff; }
+  .switch input:checked + .slider::before { transform:translateX(20px); }
+  .m-quick { display:flex; gap:8px; margin:6px 0 2px; }
+  .m-quick button { flex:1; padding:10px 0; border:1px solid #d9d9d9; background:#fff; border-radius:10px; font-size:14px; color:#555; cursor:pointer; }
+  .m-quick button.active { background:#1677ff; color:#fff; border-color:#1677ff; font-weight:600; }
+  .m-btns { display:flex; gap:10px; margin-top:16px; }
+  .m-btns button { flex:1; padding:11px; border-radius:10px; font-size:15px; cursor:pointer; border:none; }
+  .m-cancel { background:#f0f2f5; color:#555; }
+  .m-save { background:#1677ff; color:#fff; }
+  .m-del { display:block; width:100%; margin-top:12px; background:none; border:none; color:#bbb; font-size:12px; cursor:pointer; }
+  .m-title{font-size:16px;font-weight:bold;text-align:center;margin-bottom:16px;}
+  .m-normal-input { width:100%; padding:12px; font-size:14px; border:1px solid #d9d9d9; border-radius:10px; outline:none; box-sizing:border-box; }
+  td.logged { box-shadow: inset 0 0 0 1.5px #91caff; }
+  td .wh { position:absolute; top:3px; right:5px; font-size:10px; color:#1677ff; font-weight:700; line-height:1; }
+</style>
+</head>
+<body data-page-node-id="zraOJtUJkIJBEfcwnESW78">
+  <div class="card" data-page-node-id="DGwPOKall5aUHbFQ3JTmTU">
+    <div class="top" data-page-node-id="LRGYMSKSKwRk4lKPVtlzYH">
+      <button class="nav-btn" id="prev" aria-label="上一月" data-page-node-id="IrWTYUpGKDgGjUVUS18xEJ">‹</button>
+      <div style="text-align:center" data-page-node-id="WNDgNNbDTZBLHkiE7Lafuw">
+        <div class="title" id="title" data-page-node-id="ezlqEVVy6JVY1wmCOtp8NK">2026 年 10 月</div>
+        <div class="sub" id="sub" data-page-node-id="MYEYOAk84iRHn99wepXopx">含法定节假日与星期</div>
+      </div>
+      <button class="nav-btn" id="next" aria-label="下一月" data-page-node-id="zVCSgULE5lMOvPxn5XSIWP">›</button>
+    </div>
+    <div class="subbar" data-page-node-id="FQAK8uVdazYTsaFs8uOaWR"></div>
+    <div class="viewport" id="viewport" data-page-node-id="PvOO3ZPxbLAjFG3EIW110z">
+      <div class="track" id="track" data-page-node-id="jDUz53Xlt80jUp4KuKkNm2">
+        <div class="panel" id="p0" data-page-node-id="mGTWsVp2CS6XxninqALTOn"></div>
+        <div class="panel" id="p1" data-page-node-id="6W5WJjWhmSLuCFKyhc3gbZ"></div>
+        <div class="panel" id="p2" data-page-node-id="arcqHsnyIIcjmH19KJeDb8"></div>
+      </div>
+    </div>
+  </div>
+  <div class="summary" id="stats" data-page-node-id="PC3B3DzQzZ94YOkrNz8HSc"></div>
+
+  <div class="bark-wrap" data-page-node-id="zLVIPbuVaktDaBZdTbqKRF">
+    <div class="bark-row" data-page-node-id="aTah1H84AeXev73SRWBCHo">
+      <button class="bark-edit-btn" id="editBarkBtn" data-page-node-id="mQtka9lQwb0gSrmvDvW6u7">编辑Bark地址</button>
+      <button class="bark-btn" id="sendBarkBtn" data-page-node-id="RKshVRe2woApn49ebFeaP6">一键发送Bark</button>
+    </div>
+    <div class="bark-tip" id="barkTip" data-page-node-id="4wHmNdUhGnTXtFxteaaJZN"></div>
+  </div>
+
+  <div class="export-wrap" data-page-node-id="Ga0cpnYzldAFTAkqMsZVIR">
+    <button id="exportBtn" data-page-node-id="R57PfZC5O7V6FAP5MRWnHU">导出当月Excel考勤</button>
+  </div>
+
+  <div class="mask" id="mask" data-page-node-id="1tQP7y9HmhrjNnlpYTtZCt">
+    <div class="modal" data-page-node-id="Ma6hK39Z2nXSRLkRyUMUbR">
+      <div class="m-date" id="mDate" data-page-node-id="EFv2ZqjyFhPBfaOJv984Aa"></div>
+      <div class="m-label" data-page-node-id="Ry24vqLHqBdz0oQLsrFcbs">今日工作小时</div>
+      <div class="m-quick" data-page-node-id="jRD4CetHKhtzE6cJP30k7M">
+        <button type="button" data-h="0" data-page-node-id="XDS3dGuz7JW8euKce0p2qS">0 小时</button>
+        <button type="button" data-h="8" data-page-node-id="95DPlNE9QKji9mYqxQ5ihb">8 小时</button>
+        <button type="button" data-h="10" data-page-node-id="A8uINdgzglSBDk4icuFYKC">10 小时</button>
+        <button type="button" data-h="11" data-page-node-id="FA21fVaVsR63BFmHQ2Jr2H">11 小时</button>
+      </div>
+      <input class="m-input" id="mInput" type="text" inputmode="decimal" placeholder="0" data-page-node-id="iMGDigIEWiltyJEMAq32FS" />
+      <label class="m-default" id="mDefaultLabel" data-page-node-id="7H9Lgjhqwh1comZcBMJsfB">
+        <span class="m-default-text" data-page-node-id="VFSJydnTDmToMWBmHL5Q1O">设为默认</span>
+        <span class="switch" data-page-node-id="j819HkAsOfkP7pkjvHXHsC"><input type="checkbox" id="mDefault" data-page-node-id="ugDkhUZTAEGKeApKezJkr6" /><span class="slider" data-page-node-id="wXnoOH7cixHUxYHjugKkW1"></span></span>
+      </label>
+      <div class="m-btns" data-page-node-id="RyrvDg4LZyOw4lTddRCoUQ">
+        <button class="m-cancel" id="mCancel" data-page-node-id="WGQxJcMARXjTCjU3R9ER4A">取消</button>
+        <button class="m-save" id="mSave" data-page-node-id="1W7RpwMdrmvJva2Sj88BPh">保存</button>
+      </div>
+      <button class="m-del" id="mDel" style="display:none" data-page-node-id="iFAT3RdJw2sWrhSnFAFiKL">清除该日记录</button>
+    </div>
+  </div>
+
+  <div class="mask" id="barkEditMask" data-page-node-id="v1Paor5dEFH9vWiPFKMp9c">
+    <div class="modal" data-page-node-id="JCjMvalrLgZcffOmXTYCOd">
+      <div class="m-title" data-page-node-id="B4kBbIa9ObZ1i1gGvtTrxh">设置Bark推送地址</div>
+      <input class="m-normal-input" id="barkEditInput" placeholder="https://api.day.app/你的Key" data-page-node-id="lL2Ham4c8ZDvN6HraBXLkA" />
+      <div class="m-btns" data-page-node-id="eBi8moluj5yQ31cO99vPqS">
+        <button class="m-cancel" id="barkEditCancel" data-page-node-id="zP1yKyQwTkflECX17iCGWB">取消</button>
+        <button class="m-save" id="barkEditSave" data-page-node-id="vOExffwuMCc0nCTqAeyVKk">保存</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* 安全存储：localStorage被浏览器禁用/沙箱拦截时自动降级为内存存储，保证日历正常渲染 */
+const store = (function(){
+  try{
+    const t='__wb_test__';
+    localStorage.setItem(t,'1');
+    localStorage.removeItem(t);
+    return localStorage;
+  }catch(e){
+    const mem={};
+    return {
+      getItem:k=>(k in mem ? mem[k] : null),
+      setItem:(k,v)=>{ mem[k]=String(v); },
+      removeItem:k=>{ delete mem[k]; }
+    };
+  }
+})();
+const HOLIDAYS = {
+  "2026-1-1":"元旦","2026-1-2":"元旦","2026-1-3":"元旦",
+  "2026-2-15":"春节","2026-2-16":"春节","2026-2-17":"春节","2026-2-18":"春节",
+  "2026-2-19":"春节","2026-2-20":"春节","2026-2-21":"春节","2026-2-22":"春节","2026-2-23":"春节",
+  "2026-4-4":"清明","2026-4-5":"清明","2026-4-6":"清明",
+  "2026-5-1":"劳动节","2026-5-2":"劳动节","2026-5-3":"劳动节","2026-5-4":"劳动节","2026-5-5":"劳动节",
+  "2026-6-19":"端午","2026-6-20":"端午","2026-6-21":"端午",
+  "2026-9-25":"中秋","2026-9-26":"中秋","2026-9-27":"中秋",
+  "2026-10-1":"国庆","2026-10-2":"国庆","2026-10-3":"国庆","2026-10-4":"国庆",
+  "2026-10-5":"国庆","2026-10-6":"国庆","2026-10-7":"国庆"
+};
+const WORKDAYS = new Set([
+  "2026-1-4","2026-2-14","2026-2-28","2026-5-9","2026-9-20","2026-10-10"
+]);
+const _now = new Date();
+const TODAY = { y:_now.getFullYear(), m:_now.getMonth()+1, d:_now.getDate() };
+const WEEK = ["一","二","三","四","五","六","日"];
+const MONTHS = ["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"];
+function key(y,m,d){ return y+"-"+m+"-"+d; }
+function isHoliday(y,m,d){ return key(y,m,d) in HOLIDAYS; }
+function isWork(y,m,d){ return WORKDAYS.has(key(y,m,d)); }
+
+function renderPanel(el, y, m){
+  const firstDow = new Date(y, m-1, 1).getDay();
+  const firstDay = (firstDow + 6) % 7;
+  const days = new Date(y, m, 0).getDate();
+  let html = '<table><thead><tr>' + WEEK.map(w=>`<th>${w}</th>`).join('') + '</tr></thead><tbody>';
+  let cells = [];
+  for(let i=0;i<firstDay;i++) cells.push('<td class="empty"></td>');
+  for(let d=1; d<=days; d++){
+    let cls = '';
+    if(isHoliday(y,m,d)) cls = 'holiday';
+    else if(isWork(y,m,d)) cls = 'workday';
+    else if(new Date(y,m-1,d).getDay()%6===0) cls = 'weekend';
+    if(y===TODAY.y && m===TODAY.m && d===TODAY.d) cls += ' today';
+    const logged = getLog(y,m,d);
+    if(logged!==null) cls += ' logged';
+    let inner = String(d);
+    if(isHoliday(y,m,d)){
+      const name = HOLIDAYS[key(y,m,d)];
+      const prev = d-1;
+      const showName = !(prev>=1 && isHoliday(y,m,prev) && HOLIDAYS[key(y,m,prev)]===name);
+      inner += showName ? `<span class="hname">${name}</span>` : `<span class="hname">休</span>`;
+    } else if(isWork(y,m,d)){
+      inner += `<span class="mark">班</span>`;
+    }
+    if(logged!==null) inner += `<span class="wh">${logged===0?'休':logged+'h'}</span>`;
+    cells.push(`<td class="${cls.trim()}" data-y="${y}" data-m="${m}" data-d="${d}">${inner}</td>`);
+  }
+  while(cells.length % 7 !== 0) cells.push('<td class="empty"></td>');
+  for(let i=0;i<cells.length;i+=7){ html += '<tr>' + cells.slice(i,i+7).join('') + '</tr>'; }
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+let cur = { y: TODAY.y, m: TODAY.m };
+const MAX_DATE  = new Date(TODAY.y, TODAY.m-1, TODAY.d + 7);
+const track = document.getElementById('track');
+const p0 = document.getElementById('p0');
+const p1 = document.getElementById('p1');
+const p2 = document.getElementById('p2');
+const titleEl = document.getElementById('title');
+
+function fillPanels(){
+  let py = cur.y, pm = cur.m - 1; if(pm<1){ pm=12; py--; }
+  let ny = cur.y, nm = cur.m + 1; if(nm>12){ nm=1; ny++; }
+  renderPanel(p0, py, pm);
+  renderPanel(p1, cur.y, cur.m);
+  renderPanel(p2, ny, nm);
+  titleEl.textContent = cur.y + ' 年 ' + cur.m + ' 月';
+  updateStats();
+}
+function gotoBase(animate){
+  track.classList.toggle('no-anim', !animate);
+  track.style.transform = 'translateX(-100%)';
+  if(!animate){ void track.offsetWidth; track.classList.remove('no-anim'); }
+}
+function goNext(){
+  track.style.transform = 'translateX(-200%)';
+  setTimeout(()=>{
+    cur.m++; if(cur.m>12){ cur.m=1; cur.y++; }
+    fillPanels();
+    gotoBase(false);
+  }, 320);
+}
+function goPrev(){
+  track.style.transform = 'translateX(0)';
+  setTimeout(()=>{
+    cur.m--; if(cur.m<1){ cur.m=12; cur.y--; }
+    fillPanels();
+    gotoBase(false);
+  }, 320);
+}
+fillPanels();
+gotoBase(false);
+document.getElementById('next').addEventListener('click', goNext);
+document.getElementById('prev').addEventListener('click', goPrev);
+document.addEventListener('keydown', e=>{
+  if(e.key==='ArrowRight') goNext();
+  if(e.key==='ArrowLeft') goPrev();
+});
+
+const vp = document.getElementById('viewport');
+let startX=0, startY=0, dragging=false, decided=false, horiz=false;
+const THRESH = 40;
+let justDragged = false;
+function onStart(x,y){ startX=x; startY=y; dragging=true; decided=false; horiz=false; }
+function onMove(x,y){
+  if(!dragging) return;
+  const dx=x-startX, dy=y-startY;
+  if(!decided && (Math.abs(dx)>8 || Math.abs(dy)>8)){
+    decided=true; horiz = Math.abs(dx) > Math.abs(dy);
+  }
+  if(horiz){
+    const clamped = Math.max(-vp.clientWidth, Math.min(vp.clientWidth, dx*0.5));
+    track.style.transform = `translateX(calc(-100% + ${clamped}px))`;
+  }
+}
+function onEnd(x){
+  if(!dragging) return;
+  dragging=false;
+  if(!horiz) return;
+  const dx = x - startX;
+  track.classList.remove('no-anim');
+  if(dx < -THRESH){ justDragged = true; setTimeout(()=>justDragged=false, 400); goNext(); }
+  else if(dx > THRESH){ justDragged = true; setTimeout(()=>justDragged=false, 400); goPrev(); }
+  else gotoBase(true);
+}
+vp.addEventListener('touchstart', e=> onStart(e.touches[0].clientX, e.touches[0].clientY), {passive:true});
+vp.addEventListener('touchmove', e=> onMove(e.touches[0].clientX, e.touches[0].clientY), {passive:true});
+vp.addEventListener('touchend', e=> onEnd(e.changedTouches[0].clientX));
+vp.addEventListener('mousedown', e=> onStart(e.clientX, e.clientY));
+window.addEventListener('mousemove', e=> onMove(e.clientX, e.clientY));
+window.addEventListener('mouseup', e=> onEnd(e.clientX));
+
+const NORMAL_HOURS = 8;
+function getLog(y,m,d){
+  const v = parseFloat(store.getItem('worklog:'+key(y,m,d)));
+  return isNaN(v) ? null : v;
+}
+function setLog(y,m,d,v){
+  const k = 'worklog:'+key(y,m,d);
+  if(v===null || v===''){ store.removeItem(k); }
+  else { store.setItem(k, String(v)); }
+}
+const mask  = document.getElementById('mask');
+const mDate = document.getElementById('mDate');
+const mInput= document.getElementById('mInput');
+const mDel  = document.getElementById('mDel');
+const mDefault = document.getElementById('mDefault');
+let USER_DEFAULT = store.getItem('worklog:userDefault');
+let sel = null;
+
+function openModal(y,m,d){
+  sel = {y,m,d};
+  const dt = new Date(y, m-1, d);
+  const dw = dt.getDay();
+  const wname = ["日","一","二","三","四","五","六"][dw];
+  mDate.textContent = `${y}年${m}月${d}日 · 星期${wname}`;
+  const recorded = getLog(y,m,d);
+  const isWeekday = dw>=1 && dw<=5 && !isHoliday(y,m,d);
+  if(recorded!==null){
+    mInput.value = recorded;
+  } else if(USER_DEFAULT!==null && USER_DEFAULT!==''){
+    mInput.value = USER_DEFAULT;
+  } else if(isWeekday){
+    mInput.value = NORMAL_HOURS;
+  } else {
+    mInput.value = '';
+  }
+  mDefault.checked = (USER_DEFAULT!==null && USER_DEFAULT!=='');
+  mDel.style.display = recorded!==null ? 'block' : 'none';
+  syncQuick();
+  mask.classList.add('show');
+  setTimeout(()=>mInput.focus(), 60);
+}
+function closeModal(){ mask.classList.remove('show'); sel=null; }
+document.getElementById('mSave').addEventListener('click', ()=>{
+  if(!sel) return;
+  const raw = mInput.value.trim();
+  let v = parseFloat(raw);
+  if(raw==='' || isNaN(v) || v<0){ v = null; }
+  else { v = Math.min(v, 24); }
+  setLog(sel.y, sel.m, sel.d, v);
+  closeModal();
+  fillPanels();
+});
+document.getElementById('mCancel').addEventListener('click', closeModal);
+mDel.addEventListener('click', ()=>{
+  if(!sel) return;
+  setLog(sel.y, sel.m, sel.d, null);
+  closeModal();
+  fillPanels();
+});
+mask.addEventListener('click', e=>{ if(e.target===mask) closeModal(); });
+
+function syncQuick(){
+  const v = mInput.value;
+  document.querySelectorAll('.m-quick button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.h===String(v));
+  });
+}
+function saveUserDefault(){
+  USER_DEFAULT = mInput.value;
+  if(USER_DEFAULT!=='') store.setItem('worklog:userDefault', USER_DEFAULT);
+  else store.removeItem('worklog:userDefault');
+}
+document.querySelectorAll('.m-quick button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    mInput.value = btn.dataset.h; syncQuick();
+    if(mDefault.checked) saveUserDefault();
+  });
+});
+mInput.addEventListener('input', ()=>{
+  /* 只允许数字和小数点，过滤掉横杠等非法字符 */
+  const clean = mInput.value.replace(/[^0-9.]/g,'').replace(/(\..*)\./g,'$1');
+  if(clean !== mInput.value) mInput.value = clean;
+  syncQuick(); if(mDefault.checked) saveUserDefault();
+});
+mDefault.addEventListener('change', ()=>{
+  if(mDefault.checked) saveUserDefault();
+  else { USER_DEFAULT=''; store.removeItem('worklog:userDefault'); }
+});
+
+track.addEventListener('click', e=>{
+  if(justDragged) return;
+  const td = e.target.closest('td');
+  if(!td || td.classList.contains('empty')) return;
+  const y=+td.dataset.y, m=+td.dataset.m, d=+td.dataset.d;
+  if(!(y && m && d)) return;
+  const date = new Date(y, m-1, d);
+  if(date > MAX_DATE) return;
+  openModal(y,m,d);
+});
+
+function updateStats(){
+  const y=cur.y, m=cur.m;
+  const days = new Date(y,m,0).getDate();
+  let cnt=0, rest=0, total=0;
+  for(let d=1;d<=days;d++){ const v=getLog(y,m,d); if(v!==null){ if(v>0){ cnt++; total+=v; } else { rest++; } } }
+  const el = document.getElementById('stats');
+  const monthCn = MONTHS[m-1];
+  const barkBodyText = `工作 ${cnt} 天・休息 ${rest} 天・合计 ${total} 小时`;
+  const barkTitleText = `【${monthCn}考勤】`;
+  window._currentBarkTitle = barkTitleText;
+  window._currentBarkBody = barkBodyText;
+  el.innerHTML = `
+    <div>${monthCn}・共 <span class="num-red">${days}</span> 天</div>
+    <div>工作 <span class="num-red">${cnt}</span> 天・休息 <span class="num-red">${rest}</span> 天・合计 <span class="num-red">${total}</span> 小时</div>
+  `;
+}
+
+const editBarkBtn = document.getElementById('editBarkBtn');
+const sendBarkBtn = document.getElementById('sendBarkBtn');
+const barkTip = document.getElementById('barkTip');
+const barkEditMask = document.getElementById('barkEditMask');
+const barkEditInput = document.getElementById('barkEditInput');
+const barkEditCancel = document.getElementById('barkEditCancel');
+const barkEditSave = document.getElementById('barkEditSave');
+
+function getSavedBarkUrl(){
+  return (store.getItem('bark_url')||'').trim();
+}
+
+/* 把保存的地址归一化成“服务器+Key”基础地址 */
+function normalizeBarkBase(raw){
+  let u = raw.trim().replace(/\s+/g,'');
+  u = u.replace(/^https?:\/\//i, m => m.toLowerCase());
+  u = u.replace(/\/+$/,'');                       // 去掉末尾斜杠
+  // 如果用户只填了服务器地址（不含Key），提示无效
+  const parts = u.split('/').filter(Boolean);
+  if(parts.length < 2) return null;               // 至少要有 域名/Key
+  return u;
+}
+
+/* 按Bark官方格式拼推送URL：{server}/{key}/{title}/{body} */
+function buildBarkPushUrl(base, title, body){
+  return `${base}/${encodeURIComponent(title)}/${encodeURIComponent(body)}?group=kaoqin`;
+}
+
+/* 降级方案：用 Image 信标发送（不受CORS限制，但无法确认服务端结果） */
+function sendViaImage(url){
+  return new Promise(resolve=>{
+    try{
+      const img = new Image();
+      img.onload = ()=>resolve(true);
+      img.onerror = ()=>resolve(true);   // Bark返回JSON，图片解析必然报错，但请求已发出
+      img.src = url + '&_t=' + Date.now();
+      setTimeout(()=>resolve(true), 5000);  // 兜底超时
+    }catch(e){ resolve(false); }
+  });
+}
+
+editBarkBtn.addEventListener('click', ()=>{
+  barkEditInput.value = getSavedBarkUrl();
+  barkEditMask.classList.add('show');
+  setTimeout(()=>barkEditInput.focus(),50);
+});
+barkEditCancel.addEventListener('click',()=>{ barkEditMask.classList.remove('show'); });
+barkEditMask.addEventListener('click',e=>{ if(e.target===barkEditMask) barkEditMask.classList.remove('show'); });
+
+barkEditSave.addEventListener('click',()=>{
+  const val = barkEditInput.value.trim();
+  if(val){
+    const norm = normalizeBarkBase(val);
+    if(!norm){
+      barkTip.textContent="⚠️地址无效：需要包含服务器域名和Key，如 https://api.day.app/你的Key";
+      barkTip.style.color="#f5222d";
+      return;
+    }
+    store.setItem('bark_url', norm);
+  } else {
+    store.removeItem('bark_url');
+  }
+  barkEditMask.classList.remove('show');
+  barkTip.textContent="✅Bark地址已保存";
+  barkTip.style.color="#00b42a";
+  setTimeout(()=>{ barkTip.textContent=""; },1500);
+});
+
+sendBarkBtn.addEventListener('click', async ()=>{
+  const base = getSavedBarkUrl();
+  if(!base){
+    barkTip.textContent="⚠️请先点击编辑Bark地址填写推送地址";
+    barkTip.style.color="#f5222d";
+    return;
+  }
+  const normBase = normalizeBarkBase(base);
+  if(!normBase){
+    barkTip.textContent="⚠️Bark地址无效，请重新编辑（需包含域名和Key）";
+    barkTip.style.color="#f5222d";
+    return;
+  }
+  if(!window._currentBarkBody || !window._currentBarkTitle){
+    barkTip.textContent="⚠️暂无统计内容";
+    barkTip.style.color="#f5222d";
+    return;
+  }
+  barkTip.textContent="发送中…";
+  barkTip.style.color="#666";
+  const pushUrl = buildBarkPushUrl(normBase, window._currentBarkTitle, window._currentBarkBody);
+  try{
+    /* 第一步：标准GET请求（Bark官方推荐方式，返回JSON） */
+    const resp = await fetch(pushUrl, { method:'GET' });
+    if(resp.ok){
+      let code = 200;
+      try{ const j = await resp.json(); code = j.code; }catch(e){}
+      if(code === 200){
+        barkTip.textContent="✅Bark推送发送成功，请查收手机通知";
+        barkTip.style.color="#00b42a";
+      }else{
+        barkTip.textContent=`❌Bark返回错误 code=${code}`;
+        barkTip.style.color="#f5222d";
+      }
+    }else{
+      barkTip.textContent=`❌请求异常 HTTP ${resp.status}`;
+      barkTip.style.color="#f5222d";
+    }
+  }catch(err){
+    /* 第二步：跨域降级 —— 用Image信标发出去（不依赖CORS） */
+    const ok = await sendViaImage(pushUrl);
+    if(ok){
+      barkTip.textContent="📨已发送，请查收手机通知";
+      barkTip.style.color="#fa8c16";
+    }else{
+      barkTip.textContent="❌发送失败，请检查网络或Bark地址";
+      barkTip.style.color="#f5222d";
+    }
+  }
+});
+
+document.getElementById('exportBtn').addEventListener('click', ()=>exportCurrentMonthXlsx());
+
+function getWeekCn(y,m,d){
+  const arr=["周日","周一","周二","周三","周四","周五","周六"];
+  return arr[new Date(y,m-1,d).getDay()];
+}
+
+function exportCurrentMonthXlsx(){
+  const y=cur.y, m=cur.m;
+  const totalDays = new Date(y,m,0).getDate();
+  let cnt=0, rest=0, totalHours=0;
+  for(let d=1;d<=totalDays;d++){
+    const v=getLog(y,m,d);
+    if(v!==null){ if(v>0){ cnt++; totalHours+=v; }else rest++; }
+  }
+  const monthZh = MONTHS[m-1];
+  const titleText = `${monthZh}・共 ${totalDays} 天\n工作 ${cnt} 天・休息 ${rest} 天・合计 ${totalHours} 小时`;
+
+  const sharedStrings = [];
+  function ssIdx(s){
+    let i=sharedStrings.indexOf(s);
+    if(i===-1){ i=sharedStrings.length; sharedStrings.push(s); }
+    return i;
+  }
+
+  let sheetRows=[];
+  {
+    const row=[];
+    row.push({t:'s',v:ssIdx("月份")});
+    for(let c=1;c<=32;c++){
+      row.push({t:'s',v:ssIdx(titleText)});
+    }
+    sheetRows.push(row);
+  }
+  {
+    const row=[];
+    row.push({t:'s',v:ssIdx("日期")});
+    for(let d=1;d<=totalDays;d++) row.push({t:'n',v:d});
+    for(let pad=totalDays+1;pad<=31;pad++) row.push({t:'n',v:''});
+    row.push({t:'s',v:ssIdx("合计工时")});
+    sheetRows.push(row);
+  }
+  {
+    const row=[];
+    row.push({t:'s',v:ssIdx("星期")});
+    for(let d=1;d<=totalDays;d++) row.push({t:'s',v:ssIdx(getWeekCn(y,m,d))});
+    for(let pad=totalDays+1;pad<=31;pad++) row.push({t:'s',v:ssIdx("")});
+    row.push({t:'s',v:ssIdx("")});
+    sheetRows.push(row);
+  }
+  {
+    const row=[];
+    row.push({t:'s',v:ssIdx("工时")});
+    for(let d=1;d<=totalDays;d++){
+      const hv=getLog(y,m,d);
+      row.push({t:'n',v:(hv!==null&&hv>0)?hv:''});
+    }
+    for(let pad=totalDays+1;pad<=31;pad++) row.push({t:'n',v:''});
+    row.push({t:'n',v:totalHours});
+    sheetRows.push(row);
+  }
+
+  const workbookXml=`<?xml version="1.0" encoding="UTF-8"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <sheets>
+    <sheet name="考勤" sheetId="1" r:id="rId1" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/>
+  </sheets>
+</workbook>`;
+
+  let sheetDataXml='';
+  for(let ri=0;ri<sheetRows.length;ri++){
+    const cells=sheetRows[ri];
+    let rowXml='';
+    for(let ci=0;ci<cells.length;ci++){
+      const c=cells[ci];
+      const colLetter = colIndexToColLetter(ci);
+      if(c.v==='' || c.v===null){
+        rowXml+=`<c r="${colLetter}${ri+1}" t="${c.t}"><v></v></c>`;
+      }else{
+        rowXml+=`<c r="${colLetter}${ri+1}" t="${c.t}"><v>${c.v}</v></c>`;
+      }
+    }
+    sheetDataXml+=`<row r="${ri+1}">${rowXml}</row>`;
+  }
+
+  const mergeXml="<mergeCells><mergeCell ref=\"B1:AG1\"/></mergeCells>";
+  const sheetXml=`<?xml version="1.0" encoding="UTF-8"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <sheetData>${sheetDataXml}</sheetData>
+  ${mergeXml}
+</worksheet>`;
+
+  let ssXml='';
+  for(const s of sharedStrings){
+    ssXml+=`<si><t>${escapeXml(s)}</t></si>`;
+  }
+  const sharedStringXml=`<?xml version="1.0" encoding="UTF-8"?>
+<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="${sharedStrings.length}" uniqueCount="${sharedStrings.length}">${ssXml}</sst>`;
+
+  const relsWorkbook=`<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/package/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>
+</Relationships>`;
+
+  const relsSheet=`<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"/>`;
+
+  const contentTypes=`<?xml version="1.0" encoding="UTF-8"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Default Extension="xml" ContentType="application/xml"/>
+<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>
+</Types>`;
+
+  const relsRoot=`<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/package/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>`;
+
+  const files={
+    '[Content_Types].xml':contentTypes,
+    '_rels/.rels':relsRoot,
+    'xl/_rels/workbook.xml.rels':relsWorkbook,
+    'xl/workbook.xml':workbookXml,
+    'xl/sharedStrings.xml':sharedStringXml,
+    'xl/worksheets/_rels/sheet1.xml.rels':relsSheet,
+    'xl/worksheets/sheet1.xml':sheetXml
+  };
+  generateXlsxDownload(files, `${y}年${m}月考勤.xlsx`);
+}
+
+function colIndexToColLetter(n){
+  let s='';
+  while(true){
+    const rem=n%26;
+    s=String.fromCharCode(65+rem)+s;
+    n=Math.floor(n/26)-1;
+    if(n<0)break;
+  }
+  return s;
+}
+function escapeXml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+}
+
+async function generateXlsxDownload(fileMap, filename){
+  const jszip=await getJSZip();
+  const zip=new jszip();
+  for(const path in fileMap){
+    zip.file(path, fileMap[path]);
+  }
+  const blob=await zip.generateAsync({type:"blob"});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+let _jszipCache=null;
+async function getJSZip(){
+  if(_jszipCache) return _jszipCache;
+  await loadScript("https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js");
+  _jszipCache=window.JSZip;
+  return _jszipCache;
+}
+function loadScript(src){
+  return new Promise((res,rej)=>{
+    const s=document.createElement('script');
+    s.src=src;
+    s.onload=res;
+    s.onerror=rej;
+    document.head.appendChild(s);
+  });
+}
+
+</script>
+</body>
+</html>
+<!-- （注：内容由AI生成） -->
