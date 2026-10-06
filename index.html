@@ -152,14 +152,13 @@
   </div>
 
 <script>
-// ============【填入你的Worker域名！不要末尾斜杠】============
-const WORKER_API_BASE = "
-kq1.wanghai.qzz.io";
-// ========================================================================
+// ============ 已填入你的Worker域名 ============
+const WORKER_API_BASE = "https://kq1.wanghai.qzz.io";
+// ==============================================
 
-// 内存缓存：完全不再依赖localStorage，全部数据来自云端KV
+// 内存缓存：全部数据来自云端KV
 let cachedBarkUrl = "";
-let memoryWorklog = {}; // 全部工时内存对象，key:"2026‑1‑1" value:数字工时
+let memoryWorklog = {};
 
 // -------- Worker API 封装 --------
 async function loadAllCloudData() {
@@ -181,7 +180,7 @@ async function saveBarkCloud(text) {
   try {
     const res = await fetch(`${WORKER_API_BASE}/save_bark`, {
       method: "POST",
-      headers: { "Content‑Type": "application/json" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content: text })
     });
     const j = await res.json();
@@ -193,7 +192,7 @@ async function saveWholeWorklogCloud() {
   try {
     const res = await fetch(`${WORKER_API_BASE}/save_worklog`, {
       method: "POST",
-      headers: { "Content‑Type": "application/json" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ worklog: memoryWorklog })
     });
     const j = await res.json();
@@ -201,8 +200,8 @@ async function saveWholeWorklogCloud() {
   } catch(e){ return false; }
 }
 
-// -------- 日历原始函数：重写getLog / setLog，读写内存对象，写完立刻同步云端 --------
-function key(y,m,d){ return y+"‑"+m+"‑"+d; }
+// -------- 日历核心，标准半角减号 --------
+function key(y,m,d){ return y+"-"+m+"-"+d; }
 
 function getLog(y,m,d){
   const k = key(y,m,d);
@@ -217,22 +216,22 @@ async function setLog(y,m,d,v){
   }else{
     memoryWorklog[k] = Number(v);
   }
-  await saveWholeWorklogCloud(); // 修改工时立刻上云
+  await saveWholeWorklogCloud();
 }
 
 const HOLIDAYS = {
-  "2026‑1‑1":"元旦","2026‑1‑2":"元旦","2026‑1‑3":"元旦",
-  "2026‑2‑15":"春节","2026‑2‑16":"春节","2026‑2‑17":"春节","2026‑2‑18":"春节",
-  "2026‑2‑19":"春节","2026‑2‑20":"春节","2026‑2‑21":"春节","2026‑2‑22":"春节","2026‑2‑23":"春节",
-  "2026‑4‑4":"清明","2026‑4‑5":"清明","2026‑4‑6":"清明",
-  "2026‑5‑1":"劳动节","2026‑5‑2":"劳动节","2026‑5‑3":"劳动节","2026‑5‑4":"劳动节","2026‑5‑5":"劳动节",
-  "2026‑6‑19":"端午","2026‑6‑20":"端午","2026‑6‑21":"端午",
-  "2026‑9‑25":"中秋","2026‑9‑26":"中秋","2026‑9‑27":"中秋",
-  "2026‑10‑1":"国庆","2026‑10‑2":"国庆","2026‑10‑3":"国庆","2026‑10‑4":"国庆",
-  "2026‑10‑5":"国庆","2026‑10‑6":"国庆","2026‑10‑7":"国庆"
+  "2026-1-1":"元旦","2026-1-2":"元旦","2026-1-3":"元旦",
+  "2026-2-15":"春节","2026-2-16":"春节","2026-2-17":"春节","2026-2-18":"春节",
+  "2026-2-19":"春节","2026-2-20":"春节","2026-2-21":"春节","2026-2-22":"春节","2026-2-23":"春节",
+  "2026-4-4":"清明","2026-4-5":"清明","2026-4-6":"清明",
+  "2026-5-1":"劳动节","2026-5-2":"劳动节","2026-5-3":"劳动节","2026-5-4":"劳动节","2026-5-5":"劳动节",
+  "2026-6-19":"端午","2026-6-20":"端午","2026-6-21":"端午",
+  "2026-9-25":"中秋","2026-9-26":"中秋","2026-9-27":"中秋",
+  "2026-10-1":"国庆","2026-10-2":"国庆","2026-10-3":"国庆","2026-10-4":"国庆",
+  "2026-10-5":"国庆","2026-10-6":"国庆","2026-10-7":"国庆"
 };
 const WORKDAYS = new Set([
-  "2026‑1‑4","2026‑2‑14","2026‑2‑28","2026‑5‑9","2026‑9‑20","2026‑10‑10"
+  "2026-1-4","2026-2-14","2026-2-28","2026-5-9","2026-9-20","2026-10-10"
 ]);
 const _now = new Date();
 const TODAY = { y:_now.getFullYear(), m:_now.getMonth()+1, d:_now.getDate() };
@@ -242,7 +241,7 @@ function isHoliday(y,m,d){ return key(y,m,d) in HOLIDAYS; }
 function isWork(y,m,d){ return WORKDAYS.has(key(y,m,d)); }
 
 function renderPanel(el, y, m){
-  const firstDow = new Date(y, m‑1, 1).getDay();
+  const firstDow = new Date(y, m-1, 1).getDay();
   const firstDay = (firstDow + 6) % 7;
   const days = new Date(y, m, 0).getDate();
   let html = '<table><thead><tr>' + WEEK.map(w=>`<th>${w}</th>`).join('') + '</tr></thead><tbody>';
@@ -252,21 +251,21 @@ function renderPanel(el, y, m){
     let cls = '';
     if(isHoliday(y,m,d)) cls = 'holiday';
     else if(isWork(y,m,d)) cls = 'workday';
-    else if(new Date(y,m‑1,d).getDay()%6===0) cls = 'weekend';
+    else if(new Date(y,m-1,d).getDay()%6===0) cls = 'weekend';
     if(y===TODAY.y && m===TODAY.m && d===TODAY.d) cls += ' today';
     const logged = getLog(y,m,d);
     if(logged!==null) cls += ' logged';
     let inner = String(d);
     if(isHoliday(y,m,d)){
       const name = HOLIDAYS[key(y,m,d)];
-      const prev = d‑1;
+      const prev = d-1;
       const showName = !(prev>=1 && isHoliday(y,m,prev) && HOLIDAYS[key(y,m,prev)]===name);
       inner += showName ? `<span class="hname">${name}</span>` : `<span class="hname">休</span>`;
     } else if(isWork(y,m,d)){
       inner += `<span class="mark">班</span>`;
     }
     if(logged!==null) inner += `<span class="wh">${logged===0?'休':logged+'h'}</span>`;
-    cells.push(`<td class="${cls.trim()}" data‑y="${y}" data‑m="${m}" data‑d="${d}">${inner}</td>`);
+    cells.push(`<td class="${cls.trim()}" data-y="${y}" data-m="${m}" data-d="${d}">${inner}</td>`);
   }
   while(cells.length % 7 !== 0) cells.push('<td class="empty"></td>');
   for(let i=0;i<cells.length;i+=7){ html += '<tr>' + cells.slice(i,i+7).join('') + '</tr>'; }
@@ -275,7 +274,7 @@ function renderPanel(el, y, m){
 }
 
 let cur = { y: TODAY.y, m: TODAY.m };
-const MAX_DATE  = new Date(TODAY.y, TODAY.m‑1, TODAY.d + 7);
+const MAX_DATE  = new Date(TODAY.y, TODAY.m-1, TODAY.d + 7);
 const track = document.getElementById('track');
 const p0 = document.getElementById('p0');
 const p1 = document.getElementById('p1');
@@ -283,7 +282,7 @@ const p2 = document.getElementById('p2');
 const titleEl = document.getElementById('title');
 
 function fillPanels(){
-  let py = cur.y, pm = cur.m ‑ 1; if(pm<1){ pm=12; py‑‑; }
+  let py = cur.y, pm = cur.m - 1; if(pm<1){ pm=12; py--; }
   let ny = cur.y, nm = cur.m + 1; if(nm>12){ nm=1; ny++; }
   renderPanel(p0, py, pm);
   renderPanel(p1, cur.y, cur.m);
@@ -292,12 +291,12 @@ function fillPanels(){
   updateStats();
 }
 function gotoBase(animate){
-  track.classList.toggle('no‑anim', !animate);
-  track.style.transform = 'translateX(‑100%)';
-  if(!animate){ void track.offsetWidth; track.classList.remove('no‑anim'); }
+  track.classList.toggle('no-anim', !animate);
+  track.style.transform = 'translateX(-100%)';
+  if(!animate){ void track.offsetWidth; track.classList.remove('no-anim'); }
 }
 function goNext(){
-  track.style.transform = 'translateX(‑200%)';
+  track.style.transform = 'translateX(-200%)';
   setTimeout(()=>{
     cur.m++; if(cur.m>12){ cur.m=1; cur.y++; }
     fillPanels();
@@ -307,7 +306,7 @@ function goNext(){
 function goPrev(){
   track.style.transform = 'translateX(0)';
   setTimeout(()=>{
-    cur.m‑‑; if(cur.m<1){ cur.m=12; cur.y‑‑; }
+    cur.m--; if(cur.m<1){ cur.m=12; cur.y--; }
     fillPanels();
     gotoBase(false);
   }, 320);
@@ -320,22 +319,22 @@ let justDragged = false;
 function onStart(x,y){ startX=x; startY=y; dragging=true; decided=false; horiz=false; }
 function onMove(x,y){
   if(!dragging) return;
-  const dx=x‑startX, dy=y‑startY;
+  const dx=x-startX, dy=y-startY;
   if(!decided && (Math.abs(dx)>8 || Math.abs(dy)>8)){
     decided=true; horiz = Math.abs(dx) > Math.abs(dy);
   }
   if(horiz){
-    const clamped = Math.max(‑vp.clientWidth, Math.min(vp.clientWidth, dx*0.5));
-    track.style.transform = `translateX(calc(‑100% + ${clamped}px))`;
+    const clamped = Math.max(-vp.clientWidth, Math.min(vp.clientWidth, dx*0.5));
+    track.style.transform = `translateX(calc(-100% + ${clamped}px))`;
   }
 }
 function onEnd(x){
   if(!dragging) return;
   dragging=false;
   if(!horiz) return;
-  const dx = x ‑ startX;
-  track.classList.remove('no‑anim');
-  if(dx < ‑THRESH){ justDragged = true; setTimeout(()=>justDragged=false, 400); goNext(); }
+  const dx = x - startX;
+  track.classList.remove('no-anim');
+  if(dx < -THRESH){ justDragged = true; setTimeout(()=>justDragged=false, 400); goNext(); }
   else if(dx > THRESH){ justDragged = true; setTimeout(()=>justDragged=false, 400); goPrev(); }
   else gotoBase(true);
 }
@@ -358,7 +357,7 @@ let sel = null;
 
 function openModal(y,m,d){
   sel = {y,m,d};
-  const dt = new Date(y, m‑1, d);
+  const dt = new Date(y, m-1, d);
   const dw = dt.getDay();
   const wname = ["日","一","二","三","四","五","六"][dw];
   mDate.textContent = `${y}年${m}月${d}日 · 星期${wname}`;
@@ -402,19 +401,19 @@ mask.addEventListener('click', e=>{ if(e.target===mask) closeModal(); });
 
 function syncQuick(){
   const v = mInput.value;
-  document.querySelectorAll('.m‑quick button').forEach(b=>{
+  document.querySelectorAll('.m-quick button').forEach(b=>{
     b.classList.toggle('active', b.dataset.h===String(v));
   });
 }
 function saveUserDefault(){ USER_DEFAULT = mInput.value; }
-document.querySelectorAll('.m‑quick button').forEach(btn=>{
+document.querySelectorAll('.m-quick button').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     mInput.value = btn.dataset.h; syncQuick();
     if(mDefault.checked) saveUserDefault();
   });
 });
 mInput.addEventListener('input', ()=>{
-  const clean = mInput.value.replace(/[^0‑9.]/g,'').replace(/(\..*)\./g,'$1');
+  const clean = mInput.value.replace(/[^0-9.]/g,'').replace(/(\..*)\./g,'$1');
   if(clean !== mInput.value) mInput.value = clean;
   syncQuick(); if(mDefault.checked) saveUserDefault();
 });
@@ -429,7 +428,7 @@ track.addEventListener('click', e=>{
   if(!td || td.classList.contains('empty')) return;
   const y=+td.dataset.y, m=+td.dataset.m, d=+td.dataset.d;
   if(!(y && m && d)) return;
-  const date = new Date(y, m‑1, d);
+  const date = new Date(y, m-1, d);
   if(date > MAX_DATE) return;
   openModal(y,m,d);
 });
@@ -440,14 +439,14 @@ function updateStats(){
   let cnt=0, rest=0, total=0;
   for(let d=1;d<=days;d++){ const v=getLog(y,m,d); if(v!==null){ if(v>0){ cnt++; total+=v; } else { rest++; } } }
   const el = document.getElementById('stats');
-  const monthCn = MONTHS[m‑1];
+  const monthCn = MONTHS[m-1];
   const barkBodyText = `工作 ${cnt} 天・休息 ${rest} 天・合计 ${total} 小时`;
   const barkTitleText = `【${monthCn}考勤】`;
   window._currentBarkTitle = barkTitleText;
   window._currentBarkBody = barkBodyText;
   el.innerHTML = `
-    <div>${monthCn}・共 <span class="num‑red">${days}</span> 天</div>
-    <div>工作 <span class="num‑red">${cnt}</span> 天・休息 <span class="num‑red">${rest}</span> 天・合计 <span class="num‑red">${total}</span> 小时</div>
+    <div>${monthCn}・共 <span class="num-red">${days}</span> 天</div>
+    <div>工作 <span class="num-red">${cnt}</span> 天・休息 <span class="num-red">${rest}</span> 天・合计 <span class="num-red">${total}</span> 小时</div>
   `;
 }
 
@@ -547,7 +546,7 @@ sendBarkBtn.addEventListener('click', async ()=>{
 document.getElementById('exportBtn').addEventListener('click', ()=>exportCurrentMonthXlsx());
 function getWeekCn(y,m,d){
   const arr=["周日","周一","周二","周三","周四","周五","周六"];
-  return arr[new Date(y,m‑1,d).getDay()];
+  return arr[new Date(y,m-1,d).getDay()];
 }
 function exportCurrentMonthXlsx(){
   const y=cur.y, m=cur.m;
@@ -557,7 +556,7 @@ function exportCurrentMonthXlsx(){
     const v=getLog(y,m,d);
     if(v!==null){ if(v>0){ cnt++; totalHours+=v; }else rest++; }
   }
-  const monthZh = MONTHS[m‑1];
+  const monthZh = MONTHS[m-1];
   const titleText = `${monthZh}・共 ${totalDays} 天\n工作 ${cnt} 天・休息 ${rest} 天・合计 ${totalHours} 小时`;
   const sharedStrings = [];
   function ssIdx(s){
@@ -601,7 +600,7 @@ function exportCurrentMonthXlsx(){
     row.push({t:'n',v:totalHours});
     sheetRows.push(row);
   }
-  const workbookXml=`<?xml version="1.0" encoding="UTF‑8"?>
+  const workbookXml=`<?xml version="1.0" encoding="UTF-8"?>
 <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
   <sheets>
     <sheet name="考勤" sheetId="1" r:id="rId1" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/>
@@ -623,7 +622,7 @@ function exportCurrentMonthXlsx(){
     sheetDataXml+=`<row r="${ri+1}">${rowXml}</row>`;
   }
   const mergeXml="<mergeCells><mergeCell ref=\"B1:AG1\" /></mergeCells>";
-  const sheetXml=`<?xml version="1.0" encoding="UTF‑8"?>
+  const sheetXml=`<?xml version="1.0" encoding="UTF-8"?>
 <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
   <sheetData>${sheetDataXml}</sheetData>
   ${mergeXml}
@@ -632,23 +631,23 @@ function exportCurrentMonthXlsx(){
   for(const s of sharedStrings){
     ssXml+=`<si><t>${escapeXml(s)}</t></si>`;
   }
-  const sharedStringXml=`<?xml version="1.0" encoding="UTF‑8"?>
+  const sharedStringXml=`<?xml version="1.0" encoding="UTF-8"?>
 <sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="${sharedStrings.length}" uniqueCount="${sharedStrings.length}">${ssXml}</sst>`;
-  const relsWorkbook=`<?xml version="1.0" encoding="UTF‑8"?>
+  const relsWorkbook=`<?xml version="1.0" encoding="UTF-8"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
 <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
-<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>
+<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>
 </Relationships>`;
-  const relsSheet=`<?xml version="1.0" encoding="UTF‑8"?>
+  const relsSheet=`<?xml version="1.0" encoding="UTF-8"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships" />`;
-  const contentTypes=`<?xml version="1.0" encoding="UTF‑8"?>
-<Types xmlns="http://schemas.openxmlformats.org/package/2006/content‑types">
+  const contentTypes=`<?xml version="1.0" encoding="UTF-8"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
 <Default Extension="xml" ContentType="application/xml" />
-<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats‑officedocument.spreadsheetml.sheet.main+xml" />
-<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats‑officedocument.spreadsheetml.worksheet+xml" />
-<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats‑officedocument.spreadsheetml.sharedStrings+xml" />
+<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml" />
+<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml" />
+<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml" />
 </Types>`;
-  const relsRoot=`<?xml version="1.0" encoding="UTF‑8"?>
+  const relsRoot=`<?xml version="1.0" encoding="UTF-8"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
 <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml" />
 </Relationships>`;
@@ -668,7 +667,7 @@ function colIndexToColLetter(n){
   while(true){
     const rem=n%26;
     s=String.fromCharCode(65+rem)+s;
-    n=Math.floor(n/26)‑1;
+    n=Math.floor(n/26)-1;
     if(n<0)break;
   }
   return s;
