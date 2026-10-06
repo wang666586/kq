@@ -33,21 +33,19 @@
   .viewport { width: 100%; overflow: hidden; touch-action: pan-y; }
   .track { display: flex; width: 100%; transition: transform .32s cubic-bezier(.25,.8,.3,1); }
   .track.no-anim { transition: none; }
-  .panel { flex: 0 0 100%; padding: 4px 18px 22px; }
-  table { width: 100%; border-collapse: collapse; }
+  .panel { flex: 0 0 100%; padding: 10px 12px 26px; }
+  table { width: 100%; border-collapse: separate; border-spacing: 5px 6px; }
   th { font-size: 13px; color: #999; padding: 6px 0; font-weight: 600; }
   td {
-    height: 46px; text-align: center; font-size: 15px; border-radius: 10px;
+    height: 52px; text-align: center; font-size: 15px; border-radius: 10px;
     vertical-align: middle; color: #333; position: relative;
   }
   td.empty { background: transparent; }
   th:nth-child(6), td:nth-child(6) { color: #fa8c16; }
   th:nth-child(7), td:nth-child(7) { color: #fa8c16; }
-  td.weekend:not(.holiday):not(.workday) { background: #fff7e6; }
-  td.holiday { background: #fff1f0; color: #d4380d; font-weight: 600; }
-  td.holiday .hname { display:block; font-size:10px; line-height: 1; margin-top: 2px; }
-  td.workday { background: #fafafa; color: #8c8c8c; }
-  td.workday .mark { display:block; font-size:10px; line-height: 1; margin-top: 2px; }
+  td.weekend { background: #fff7e6; }
+  td.logged-work { background:#f6ffed; }
+  td.logged-rest { background:#fff1f0; }
   td.today { outline: 2px solid #1677ff; outline-offset: -2px; }
   .summary { width:100%; max-width:440px; background:#fff; border-radius:14px; box-shadow:0 2px 10px rgba(0,0,0,.05); padding:14px 18px; margin-top:14px; text-align:center; font-size:15px; line-height:1.7; }
   .summary .num-red { color:#f5222d; font-weight:bold; font-size:16px; }
@@ -83,7 +81,19 @@
   .m-title{font-size:16px;font-weight:bold;text-align:center;margin-bottom:16px;}
   .m-normal-input { width:100%; padding:12px; font-size:14px; border:1px solid #d9d9d9; border-radius:10px; outline:none; box-sizing:border-box; }
   td.logged { box-shadow: inset 0 0 0 1.5px #91caff; }
-  td .wh { position:absolute; top:3px; right:5px; font-size:10px; color:#1677ff; font-weight:700; line-height:1; }
+  td .wh { position:absolute; top:3px; right:5px; font-size:10px; font-weight:700; line-height:1; }
+  td .wh.wh-work { color:#52c41a; }
+  td .wh.wh-rest { color:#f5222d; }
+  td .day-bar { position:absolute; bottom:5px; left:50%; transform:translateX(-50%); height:4px; border-radius:2px; }
+  .num-green { color:#52c41a; font-weight:bold; font-size:16px; }
+  .num-blue { color:#1677ff; font-weight:bold; font-size:16px; }
+  .num-purple { color:#722ed1; font-weight:bold; font-size:16px; }
+  .legend-row { display:flex; justify-content:center; align-items:center; gap:18px; margin-bottom:10px; }
+  .legend-item { display:flex; align-items:center; gap:6px; }
+  .legend-bar { width:40px; height:4px; border-radius:2px; }
+  .legend-txt { font-size:12px; color:#666; }
+  .seg-green { background:#52c41a; }
+  .seg-red { background:#f5222d; }
 </style>
 </head>
 <body>
@@ -92,7 +102,7 @@
       <button class="nav-btn" id="prev" aria-label="上一月">‹</button>
       <div style="text-align:center">
         <div class="title" id="title">2026 年 10 月</div>
-        <div class="sub" id="sub">含法定节假日与星期</div>
+        <div class="sub" id="sub">记录每日工时</div>
       </div>
       <button class="nav-btn" id="next" aria-label="下一月">›</button>
     </div>
@@ -219,27 +229,10 @@ async function setLog(y,m,d,v){
   await saveWholeWorklogCloud();
 }
 
-const HOLIDAYS = {
-  "2026-1-1":"元旦","2026-1-2":"元旦","2026-1-3":"元旦",
-  "2026-2-15":"春节","2026-2-16":"春节","2026-2-17":"春节","2026-2-18":"春节",
-  "2026-2-19":"春节","2026-2-20":"春节","2026-2-21":"春节","2026-2-22":"春节","2026-2-23":"春节",
-  "2026-4-4":"清明","2026-4-5":"清明","2026-4-6":"清明",
-  "2026-5-1":"劳动节","2026-5-2":"劳动节","2026-5-3":"劳动节","2026-5-4":"劳动节","2026-5-5":"劳动节",
-  "2026-6-19":"端午","2026-6-20":"端午","2026-6-21":"端午",
-  "2026-9-25":"中秋","2026-9-26":"中秋","2026-9-27":"中秋",
-  "2026-10-1":"国庆","2026-10-2":"国庆","2026-10-3":"国庆","2026-10-4":"国庆",
-  "2026-10-5":"国庆","2026-10-6":"国庆","2026-10-7":"国庆"
-};
-const WORKDAYS = new Set([
-  "2026-1-4","2026-2-14","2026-2-28","2026-5-9","2026-9-20","2026-10-10"
-]);
 const _now = new Date();
 const TODAY = { y:_now.getFullYear(), m:_now.getMonth()+1, d:_now.getDate() };
 const WEEK = ["一","二","三","四","五","六","日"];
 const MONTHS = ["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"];
-function isHoliday(y,m,d){ return key(y,m,d) in HOLIDAYS; }
-function isWork(y,m,d){ return WORKDAYS.has(key(y,m,d)); }
-
 function renderPanel(el, y, m){
   const firstDow = new Date(y, m-1, 1).getDay();
   const firstDay = (firstDow + 6) % 7;
@@ -249,22 +242,18 @@ function renderPanel(el, y, m){
   for(let i=0;i<firstDay;i++) cells.push('<td class="empty"></td>');
   for(let d=1; d<=days; d++){
     let cls = '';
-    if(isHoliday(y,m,d)) cls = 'holiday';
-    else if(isWork(y,m,d)) cls = 'workday';
-    else if(new Date(y,m-1,d).getDay()%6===0) cls = 'weekend';
+    if(new Date(y,m-1,d).getDay()%6===0) cls = 'weekend';
     if(y===TODAY.y && m===TODAY.m && d===TODAY.d) cls += ' today';
     const logged = getLog(y,m,d);
-    if(logged!==null) cls += ' logged';
+    if(logged!==null) cls += ' logged ' + (logged>0 ? 'logged-work' : 'logged-rest');
     let inner = String(d);
-    if(isHoliday(y,m,d)){
-      const name = HOLIDAYS[key(y,m,d)];
-      const prev = d-1;
-      const showName = !(prev>=1 && isHoliday(y,m,prev) && HOLIDAYS[key(y,m,prev)]===name);
-      inner += showName ? `<span class="hname">${name}</span>` : `<span class="hname">休</span>`;
-    } else if(isWork(y,m,d)){
-      inner += `<span class="mark">班</span>`;
+    if(logged!==null){
+      inner += `<span class="wh ${logged>0?'wh-work':'wh-rest'}">${logged===0?'休':logged+'h'}</span>`;
+      // 色柱样式统一：所有柱固定同宽(70%)，仅颜色区分绿/红
+      const bw = 70;
+      const bc = logged>0 ? '#52c41a' : '#f5222d';
+      inner += `<span class="day-bar" style="width:${bw}%;background:${bc}"></span>`;
     }
-    if(logged!==null) inner += `<span class="wh">${logged===0?'休':logged+'h'}</span>`;
     cells.push(`<td class="${cls.trim()}" data-y="${y}" data-m="${m}" data-d="${d}">${inner}</td>`);
   }
   while(cells.length % 7 !== 0) cells.push('<td class="empty"></td>');
@@ -362,7 +351,7 @@ function openModal(y,m,d){
   const wname = ["日","一","二","三","四","五","六"][dw];
   mDate.textContent = `${y}年${m}月${d}日 · 星期${wname}`;
   const recorded = getLog(y,m,d);
-  const isWeekday = dw>=1 && dw<=5 && !isHoliday(y,m,d);
+  const isWeekday = dw>=1 && dw<=5;
   if(recorded!==null){
     mInput.value = recorded;
   } else if(USER_DEFAULT!==null && USER_DEFAULT!==''){
@@ -440,13 +429,18 @@ function updateStats(){
   for(let d=1;d<=days;d++){ const v=getLog(y,m,d); if(v!==null){ if(v>0){ cnt++; total+=v; } else { rest++; } } }
   const el = document.getElementById('stats');
   const monthCn = MONTHS[m-1];
+  // 双色小横条：绿=工作，红=休息，两条等长显示，后跟文字标注
   const barkBodyText = `工作 ${cnt} 天・休息 ${rest} 天・合计 ${total} 小时`;
   const barkTitleText = `【${monthCn}考勤】`;
   window._currentBarkTitle = barkTitleText;
   window._currentBarkBody = barkBodyText;
   el.innerHTML = `
-    <div>${monthCn}・共 <span class="num-red">${days}</span> 天</div>
-    <div>工作 <span class="num-red">${cnt}</span> 天・休息 <span class="num-red">${rest}</span> 天・合计 <span class="num-red">${total}</span> 小时</div>
+    <div class="legend-row">
+      <div class="legend-item"><div class="legend-bar seg-green"></div><span class="legend-txt">工作</span></div>
+      <div class="legend-item"><div class="legend-bar seg-red"></div><span class="legend-txt">休息</span></div>
+    </div>
+    <div>${monthCn}・共 <span class="num-blue">${days}</span> 天</div>
+    <div>工作 <span class="num-green">${cnt}</span> 天・休息 <span class="num-red">${rest}</span> 天・合计 <span class="num-purple">${total}</span> 小时</div>
   `;
 }
 
@@ -502,16 +496,13 @@ sendBarkBtn.addEventListener('click', async ()=>{
     const formData = new URLSearchParams();
     formData.append('title', window._currentBarkTitle);
     formData.append('body', window._currentBarkBody);
-    const resp = await fetch(urlRaw, { method:'POST', body: formData });
-    if(resp.ok){
-      barkTip.textContent="✅Bark推送发送成功";
-      barkTip.style.color="#00b42a";
-    }else{
-      barkTip.textContent=`❌请求异常 HTTP ${resp.status}`;
-      barkTip.style.color="#f5222d";
-    }
+    // Bark服务器不返回CORS头，普通fetch虽然能发出请求但读响应会报错。
+    // 改用 no-cors 模式：请求成功发出且fetch不抛错即视为发送成功。
+    await fetch(urlRaw, { method:'POST', body: formData, mode: 'no-cors' });
+    barkTip.textContent="✅Bark推送发送成功";
+    barkTip.style.color="#00b42a";
   }catch(err){
-    barkTip.textContent="❌发送失败（Bark后端未开启CORS跨域）";
+    barkTip.textContent="❌发送失败，请检查网络或Bark地址是否正确";
     barkTip.style.color="#f5222d";
     console.error(err);
   }
