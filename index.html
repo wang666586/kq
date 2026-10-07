@@ -4,7 +4,7 @@
 <script data-page-node-id="yu9DhNmBQcNDWf2T43N54P" src="/page/page_comm/inject.js"></script>
 <meta data-page-node-id="QvoAipDhdRA9cAxbdD4HhI" charset="UTF-8">
 <meta data-page-node-id="IHXXDOGeM0bqLtPZZiWCGs" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
-<title data-page-node-id="BWFL22cRdy43dAfLLgWKkj" data-pnid-children="Nnm2v21Ub4WB3N2YOQ1MSi">2026年日历 · 滑动切换月份</title>
+<title data-page-node-id="BWFL22cRdy43dAfLLgWKkj" data-pnid-children="Nnm2v21Ub4WB3N2YOQ1MSi">考勤记录</title>
 <style data-page-node-id="7p9fVfsPhSw7iHHJr626nY" data-pnid-children="3Nd9WRi0dxShWZJntXp0oo">
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
@@ -55,6 +55,8 @@
   .bark-btn { padding:10px 14px; border:none; border-radius:8px; background:#ff7d00; color:#fff; cursor:pointer; font-size:13px; flex:1; }
   .bark-edit-btn { padding:10px 12px; border:none; border-radius:8px; background:#1677ff; color:#fff; cursor:pointer; font-size:13px; }
   .bark-tip { font-size:12px; color:#888; min-height:18px; margin-top:8px; word-break:break-all; }
+  #logoutBtn { width:100%; margin-top:12px; padding:10px; border:1px solid #d9d9d9; border-radius:14px; background:#fff; color:#8c8c8c; font-size:14px; cursor:pointer; }
+  #logoutBtn:active { background:#fafafa; }
   .export-wrap { width:100%; max-width:440px; margin-top:12px; }
   #exportBtn { width:100%; padding:12px; border:none; border-radius:14px; background:#1677ff; color:#fff; font-size:15px; cursor:pointer; }
   .mask { position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; z-index:50; padding:20px; }
@@ -101,10 +103,6 @@
   .print-mask.show .print-panel { max-width:1040px; max-height:none; margin:0 auto; }
   body.att-view { background:#f5f6fa; }
   body.att-view .card, body.att-view .export-wrap { display:none; }
-  /* A4 横向预览态：把表格放进一张 A4 横向比例的"纸"里 */
-  body.a4-preview .print-sheet { background:#8a8f99; padding:16px; align-items:center; justify-content:flex-start; }
-  body.a4-preview .a4-sheet { width:297mm; min-width:0; max-width:100%; min-height:210mm; margin:0 auto; box-shadow:0 4px 20px rgba(0,0,0,.35); justify-content:flex-start; flex:0 1 auto; }
-  body.a4-preview .att-table { min-width:0; width:100%; table-layout:fixed; }
   .print-toolbar { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid #eee; flex:none; gap:12px; }
   .print-title { font-size:15px; font-weight:700; }
   .print-actions { display:flex; gap:8px; }
@@ -240,7 +238,6 @@
     .print-panel { max-width:none; max-height:none; box-shadow:none; border-radius:0; overflow:visible; }
     .print-toolbar, .print-actions, .month-nav, .bark-wrap { display:none !important; }
     .print-sheet { overflow:visible; padding:0; background:#fff; display:block; }
-    .a4-sheet { width:100%; min-height:auto; box-shadow:none; padding:0; margin:0; display:block; }
     .att-table { min-width:0; width:100%; table-layout:fixed; }
   }
 </style>
@@ -305,7 +302,6 @@
   </div>
   <div data-page-node-id="osJADgxGbB6CF8IdIG4FvM" class="export-wrap">
     <button data-page-node-id="yrqUCho7BcbSCudz67orUA" id="exportBtn"><!--pnid:A01CvMgsXvSPQZD7CNRu8b-->查看当月考勤</button>
-    <button data-page-node-id="Oj44wDKno6mucGY8m9kLy0" id="logoutBtn" style="width:100%; margin-top:10px; padding:10px; border:1px solid #d9d9d9; border-radius:14px; background:#fff; color:#8c8c8c; font-size:14px; cursor:pointer"><!--pnid:ssUclwQ2IsJ6zqQsIqXE9P-->退出登录</button>
   </div>
 
   <div data-page-node-id="3PGCKAzs1wPNhBXA5AtLsH" class="mask print-mask" id="printMask">
@@ -313,7 +309,7 @@
       <div data-page-node-id="xtMtkuuNhkRa08n3Xmj60s" class="print-toolbar">
         <span data-page-node-id="3HllsU8CW2jMDSkiBYS0tk" class="print-title" id="printTitle"><!--pnid:lSHw6ggXlDpnj09T9w0pUM-->当月考勤</span>
         <div data-page-node-id="tpbfpSNFCwclATo1EpJH9l" class="print-actions">
-          <button data-page-node-id="a17fQX42qBMHyfip86ws6D" class="bark-btn" id="printBtn"><!--pnid:josyXdWyU8kcZLU2BSRbRq-->打印预览</button>
+          <button data-page-node-id="a17fQX42qBMHyfip86ws6D" class="bark-btn" id="printBtn"><!--pnid:josyXdWyU8kcZLU2BSRbRq-->导出Excel</button>
           <button data-page-node-id="DUw6kMwbLKjCZPvrw1w9my" class="bark-edit-btn" id="printClose"><!--pnid:AwDCDIkqoNb2a8Zw1wKT8w-->返回</button>
         </div>
       </div>
@@ -328,6 +324,7 @@
       </div>
       <div data-page-node-id="MfwQNdZDgUgWAVtD55ImLn" class="bark-wrap">
         <div data-page-node-id="nHsgDh3tYJHnGpR4nugYzk" class="bark-tip" id="barkTip"></div>
+        <button data-page-node-id="Oj44wDKno6mucGY8m9kLy0" id="logoutBtn"><!--pnid:ssUclwQ2IsJ6zqQsIqXE9P-->退出登录</button>
       </div>
     </div>
   </div>
@@ -637,7 +634,8 @@ function updateStats(){
   const y=cur.y, m=cur.m;
   const st = monthStats(y,m);
   const monthCn = MONTHS[m-1];
-  window._currentBarkTitle = `【${monthCn}考勤】`;
+  const daysInMonth = new Date(y, m, 0).getDate();   // 当月总天数
+  window._currentBarkTitle = `【${monthCn}考勤-共${daysInMonth}天】`;
   window._currentBarkBody = `工作 ${st.cnt} 天・休息 ${st.rest} 天・合计 ${st.total} 小时`;
   const el = document.getElementById('stats');
   if(el){
@@ -990,21 +988,28 @@ async function enterApp(){
   function closeAttView(){
     printMask.classList.remove('show');
     document.body.classList.remove('att-view');
-    document.body.classList.remove('a4-preview');
-    document.getElementById('printBtn').textContent = '打印预览';
     window.scrollTo(0,0);
   }
   document.getElementById('printClose').addEventListener('click', closeAttView);
-  document.getElementById('printBtn').addEventListener('click', ()=>{
+  document.getElementById('printBtn').addEventListener('click', async ()=>{
     const btn = document.getElementById('printBtn');
-    if(document.body.classList.contains('a4-preview')){
-      window.print();
-    }else{
-      document.body.classList.add('a4-preview');
-      printMask.classList.add('show');
-      btn.textContent = '确认打印';
-      window.scrollTo(0,0);
+    const prevText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '导出中…';
+    try{
+      // 导出「当前查看的月份」（第二页可翻月），而非日历当前月
+      const y = viewCur ? viewCur.y : cur.y;
+      const m = viewCur ? viewCur.m : cur.m;
+      await exportMonthXlsx(y, m);
+      barkTip.textContent = `✅已导出 ${y}年${m}月考勤.xlsx`;
+      barkTip.style.color = '#00b42a';
+    }catch(e){
+      console.error(e);
+      barkTip.textContent = '❌导出失败，请检查网络后重试';
+      barkTip.style.color = '#f5222d';
     }
+    btn.disabled = false;
+    btn.textContent = prevText === '导出中…' ? '导出Excel' : prevText;
   });
 
   let viewCur = null;
@@ -1026,7 +1031,7 @@ async function enterApp(){
       else { hourCells += '<td class="rest">休</td>'; restDays++; }
     }
     document.getElementById('printTitle').textContent = y + '年' + m + '月考勤';
-    const html = `<div class="a4-sheet">`
+    const html = `<div class="a4-holder"><div class="a4-sheet">`
       + `<h2>${y}年${m}月考勤</h2>`
       + `<table class="att-table"><thead><tr>`
       + `<th class="row-head">项目</th>${dateCells}<th class="sum-head">合计工时</th>`
@@ -1035,8 +1040,13 @@ async function enterApp(){
       + `<tr><th class="row-head">工时</th>${hourCells}<td class="sum-cell">${totalHours}</td></tr>`
       + `</tbody></table>`
       + `<div class="a4-sub">提示：工作日 ${weekdayHours} 小时　双休日 ${weekendHours} 小时</div>`
-      + `</div>`;
+      + `</div></div>`;
     document.getElementById('printSheet').innerHTML = html;
+    // 同步 Bark 推送标题/正文，使第二页翻月后发送的内容与当前查看月份一致
+    const daysInMonth = new Date(y, m, 0).getDate();
+    const MONTHS = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+    window._currentBarkTitle = `【${MONTHS[m-1]}考勤-共${daysInMonth}天】`;
+    window._currentBarkBody = `工作 ${workDays} 天・休息 ${restDays} 天・合计 ${totalHours} 小时`;
   }
 
   document.getElementById('exportBtn').addEventListener('click', ()=>{
@@ -1060,7 +1070,9 @@ function getWeekCn(y,m,d){
   return arr[new Date(y,m-1,d).getDay()];
 }
 function exportCurrentMonthXlsx(){
-  const y=cur.y, m=cur.m;
+  return exportMonthXlsx(cur.y, cur.m);
+}
+function exportMonthXlsx(y, m){
   const totalDays = new Date(y,m,0).getDate();
   const dayCols = totalDays + 2;   // A表头列 + 日期列们 + 合计工时列
   const lastCol = colIndexToColLetter(dayCols-1);
@@ -1218,7 +1230,7 @@ function exportCurrentMonthXlsx(){
     'xl/worksheets/_rels/sheet1.xml.rels':relsSheet,
     'xl/worksheets/sheet1.xml':sheetXml
   };
-  generateXlsxDownload(files, `${y}年${m}月考勤.xlsx`);
+  return generateXlsxDownload(files, `${y}年${m}月考勤.xlsx`);
 }
 function colIndexToColLetter(n){
   let s='';
