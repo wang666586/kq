@@ -29,7 +29,6 @@
   .nav-btn:active { background: #d6e4ff; }
   .nav-btn:disabled { opacity: .3; cursor: default; background: #f0f2f5; color: #bbb; }
   .title { font-size: 20px; font-weight: 700; letter-spacing: 1px; }
-  .sub { font-size: 12px; color: #aaa; text-align: center; margin-top: 2px; }
   .subbar { padding-bottom: 10px; }
   .viewport { width: 100%; overflow: hidden; touch-action: pan-y; }
   .track { display: flex; width: 100%; transition: transform .32s cubic-bezier(.25,.8,.3,1); }
@@ -165,7 +164,6 @@
   body.dark { background:#12151c; color:#d7dee8; }
   body.dark .card { background:#1b2029; box-shadow:0 4px 18px rgba(0,0,0,.45); }
   body.dark .title { color:#e8eefb; }
-  body.dark .sub { color:#7d8a9c; }
   body.dark .nav-btn { background:#262d3a; color:#5ca8ff; }
   body.dark .nav-btn:active { background:#2f384a; }
   body.dark .nav-btn:disabled { background:#202632; color:#4a5666; }
@@ -225,6 +223,35 @@
   body.dark .att-table .sum-cell, body.dark .att-table td.sum-cell { background:#4a3f14; color:#ffd666; }
   body.dark .a4-sheet h2 { background:#4a3f14; border-color:#333c4c; border-bottom:none; color:#ffd666; }
   @media print { body.dark { background:#fff !important; } body.dark .a4-sheet, body.dark .att-table td { background:#fff !important; color:#000 !important; } }
+  /* ============ 批量连选 & 一次性设置工时 ============ */
+  /* 选中态：浅黄底 + 深棕字 + 金色内描边，柔和醒目 */
+  #calTable td.sel { background:#ffe58f !important; color:#614700 !important; box-shadow: inset 0 0 0 2px #d48806; }
+  #calTable td.sel .wh { color:#614700; }
+  #calTable td.today.sel { outline-color:#d48806; }
+  body.dark #calTable td.sel { background:#ffe58f !important; box-shadow: inset 0 0 0 2px #b37b00; }
+  .batch-bar { display:none; width:100%; padding:10px 14px 12px; border-top:1px dashed #f0f0f0; }
+  .batch-bar.show { display:block; }
+  .batch-row1 { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .batch-info { font-size:13px; color:#555; text-align:left; }
+  .batch-info b { color:#1677ff; font-size:15px; }
+  .batch-clear { border:none; background:none; color:#f5222d; font-size:12px; cursor:pointer; padding:4px 6px; }
+  .batch-clear:disabled { opacity:.5; }
+  .batch-row2 { display:flex; gap:8px; align-items:center; }
+  .batch-quick { flex:1; display:flex; gap:6px; min-width:0; }
+  .batch-quick button { flex:1; padding:9px 0; border:1px solid #d9d9d9; background:#fff; border-radius:9px; font-size:13px; color:#555; cursor:pointer; }
+  .batch-quick button.active { background:#1677ff; color:#fff; border-color:#1677ff; font-weight:600; }
+  #batchInput { width:62px; flex:none; padding:9px 4px; font-size:16px; border:1px solid #d9d9d9; border-radius:9px; text-align:center; outline:none; box-sizing:border-box; }
+  #batchInput:focus { border-color:#1677ff; }
+  #batchSave { flex:none; padding:10px 16px; border:none; border-radius:9px; background:#1677ff; color:#fff; font-size:14px; cursor:pointer; white-space:nowrap; }
+  #batchSave:disabled { opacity:.5; }
+  .batch-msg { min-height:16px; margin-top:6px; font-size:12px; text-align:center; }
+  .batch-msg.ok { color:#52c41a; }
+  .batch-msg.err { color:#f5222d; }
+  body.dark .batch-bar { border-top-color:#2a3040; }
+  body.dark .batch-info { color:#9aa7b8; }
+  body.dark .batch-quick button { background:#242c38; border-color:#333c4c; color:#cbd5e3; }
+  body.dark .batch-quick button.active { background:#1677ff; color:#fff; border-color:#1677ff; }
+  body.dark #batchInput { background:#12161e; border-color:#333c4c; color:#e8eefb; }
   @media (max-width: 600px) {
     .month-nav { gap:4px; padding:8px 0 0; }
     .month-nav button { padding:8px 4px; font-size:11px; }
@@ -286,7 +313,6 @@
       <button data-page-node-id="n6TERvVA2upBpCxBsLkV3M" aria-label="上一月" class="nav-btn" id="prev"><!--pnid:5jM9Zf2UEIPXXcAYTbt981-->‹</button>
       <div data-page-node-id="AJYXNCCJZ8T2poAI4pQjq7" style="text-align:center">
         <div data-page-node-id="IgTDXJAxuSfj4puinPmKXc" class="title" id="title"><!--pnid:HKCfHlotR4aCQd6yLu2kFB-->2026 年 10 月</div>
-        <div data-page-node-id="94W96PBFNT879g1vKvLCIU" class="sub" id="sub"><!--pnid:tzYPQdIcKcjMC1yfmMPcph-->记录每日工时</div>
       </div>
       <button data-page-node-id="8YELkw5uHUt0Bv5NidwP8H" aria-label="下一月" class="nav-btn" id="next"><!--pnid:OxD7Aje0sWVhrfW2eku2Y3-->›</button>
     </div>
@@ -297,6 +323,23 @@
         <div data-page-node-id="E5o4LGEvTNmhlyZsCeBHPf" class="panel" id="p1"></div>
         <div data-page-node-id="kqBo45KVCcrlgAqShQGlOK" class="panel" id="p2"></div>
       </div>
+    </div>
+    <div class="batch-bar" id="batchBar">
+      <div class="batch-row1">
+        <div class="batch-info">已选 <b id="batchCount">0</b> 天<span id="batchRange"></span></div>
+        <button class="batch-clear" id="batchDel" type="button">清除记录</button>
+      </div>
+      <div class="batch-row2">
+        <div class="batch-quick" id="batchQuick">
+          <button data-h="0" type="button">0</button>
+          <button data-h="8" type="button">8</button>
+          <button data-h="10" type="button">10</button>
+          <button data-h="11" type="button">11</button>
+        </div>
+        <input id="batchInput" inputmode="decimal" placeholder="小时" type="text">
+        <button id="batchSave" type="button">保存</button>
+      </div>
+      <div class="batch-msg" id="batchMsg"></div>
     </div>
     <div data-page-node-id="LE19IauqlWwMC6qNzA6eAf" class="summary" id="stats"></div>
   </div>
@@ -452,6 +495,7 @@ function renderPanel(el, y, m){
     let cls = '';
     if(new Date(y,m-1,d).getDay()%6===0) cls = 'weekend';
     if(y===TODAY.y && m===TODAY.m && d===TODAY.d) cls += ' today';
+    if(selectedTs.has(dayStart(new Date(y,m-1,d)))) cls += ' sel';
     const logged = getLog(y,m,d);
     if(logged!==null) cls += ' logged ' + (logged>0 ? 'logged-work' : 'logged-rest');
     let inner = String(d);
@@ -471,7 +515,10 @@ function renderPanel(el, y, m){
 }
 
 let cur = { y: TODAY.y, m: TODAY.m };
-const MAX_DATE  = new Date(TODAY.y, TODAY.m-1, TODAY.d + 7);
+// 可连选规则：仅「今天所在的月份」整月可连选（如 10 月只有 10 月可点）。
+// 翻到上月/下月均不可点击；进入新月份后自动切换为新的当月可点。
+// dayStart：把日期「零点化」，避免时分秒与跨月/跨年误差
+function dayStart(dt){ return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime(); }
 const track = document.getElementById('track');
 const p0 = document.getElementById('p0');
 const p1 = document.getElementById('p1');
@@ -542,81 +589,78 @@ vp.addEventListener('mousedown', e=> onStart(e.clientX, e.clientY));
 window.addEventListener('mousemove', e=> onMove(e.clientX, e.clientY));
 window.addEventListener('mouseup', e=> onEnd(e.clientX));
 
-// 工时弹窗
-const NORMAL_HOURS = 8;
-const mask  = document.getElementById('mask');
-const mDate = document.getElementById('mDate');
-const mInput= document.getElementById('mInput');
-const mDel  = document.getElementById('mDel');
-const mDefault = document.getElementById('mDefault');
-let USER_DEFAULT = null;
-let sel = null;
+// ============ 批量连选 & 一次性设置工时 ============
+// 交互：点击日期 = 选中/取消（可连选多个），选好后点击「保存」一次性写入所有选中日期。
+const selectedTs = new Set();   // 已选日期集合（存 dayStart 时间戳，跨月/跨年安全）
+const batchBar   = document.getElementById('batchBar');
+const batchCount = document.getElementById('batchCount');
+const batchRange = document.getElementById('batchRange');
+const batchInput = document.getElementById('batchInput');
+const batchMsg   = document.getElementById('batchMsg');
+const batchQuick = document.getElementById('batchQuick');
+const batchSave  = document.getElementById('batchSave');
+const batchDel   = document.getElementById('batchDel');
+let batchHideTimer = null;
 
-function openModal(y,m,d){
-  sel = {y,m,d};
-  const dt = new Date(y, m-1, d);
-  const dw = dt.getDay();
-  const wname = ["日","一","二","三","四","五","六"][dw];
-  mDate.textContent = `${y}年${m}月${d}日 · 星期${wname}`;
-  const recorded = getLog(y,m,d);
-  const isWeekday = dw>=1 && dw<=5;
-  if(recorded!==null){
-    mInput.value = recorded;
-  } else if(USER_DEFAULT!==null && USER_DEFAULT!==''){
-    mInput.value = USER_DEFAULT;
-  } else if(isWeekday){
-    mInput.value = NORMAL_HOURS;
-  } else {
-    mInput.value = '';
+function selectedDates(){
+  return [...selectedTs].sort((a,b)=>a-b).map(ts=>{
+    const dt = new Date(ts);
+    return { y: dt.getFullYear(), m: dt.getMonth()+1, d: dt.getDate() };
+  });
+}
+
+function showBatchMsg(text, ok){
+  batchMsg.textContent = text;
+  batchMsg.className = 'batch-msg ' + (ok ? 'ok' : 'err');
+}
+function scheduleBatchHide(){
+  clearTimeout(batchHideTimer);
+  batchHideTimer = setTimeout(()=>{
+    batchHideTimer = null;
+    batchMsg.textContent = '';
+    if(!selectedTs.size) batchBar.classList.remove('show');
+  }, 2000);
+}
+
+// 保存/清除成功后选择已清空：计数与范围归零，但保留成功提示 2 秒
+function resetBatchCounts(){
+  batchCount.textContent = '0';
+  batchRange.textContent = '';
+}
+
+function updateBatchBar(){
+  const n = selectedTs.size;
+  if(n > 0){
+    batchCount.textContent = n;
+    const ds = selectedDates();
+    batchRange.textContent = ds.length > 1
+      ? `（${ds[0].m}/${ds[0].d} ~ ${ds[ds.length-1].m}/${ds[ds.length-1].d}）` : '';
+    batchBar.classList.add('show');
+  }else if(!batchHideTimer){
+    batchBar.classList.remove('show');
+    batchMsg.textContent = '';
   }
-  mDefault.checked = (USER_DEFAULT!==null && USER_DEFAULT!=='');
-  mDel.style.display = recorded!==null ? 'block' : 'none';
-  syncQuick();
-  mask.classList.add('show');
-  setTimeout(()=>mInput.focus(), 60);
 }
-function closeModal(){ mask.classList.remove('show'); sel=null; }
 
-document.getElementById('mSave').addEventListener('click', async ()=>{
-  if(!sel) return;
-  const raw = mInput.value.trim();
-  let v = parseFloat(raw);
-  if(raw==='' || isNaN(v) || v<0){ v = null; }
-  else { v = Math.min(v, 24); }
-  await setLog(sel.y, sel.m, sel.d, v);
-  closeModal();
+function clearSelection(){
+  selectedTs.clear();
   fillPanels();
-});
-document.getElementById('mCancel').addEventListener('click', closeModal);
-mDel.addEventListener('click', async ()=>{
-  if(!sel) return;
-  await setLog(sel.y, sel.m, sel.d, null);
-  closeModal();
-  fillPanels();
-});
-mask.addEventListener('click', e=>{ if(e.target===mask) closeModal(); });
+  updateBatchBar();
+}
 
-function syncQuick(){
-  const v = mInput.value;
-  document.querySelectorAll('.m-quick button').forEach(b=>{
-    b.classList.toggle('active', b.dataset.h===String(v));
+function syncBatchQuick(){
+  const v = batchInput.value;
+  batchQuick.querySelectorAll('button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.h === String(v));
   });
 }
-function saveUserDefault(){ USER_DEFAULT = mInput.value; }
-document.querySelectorAll('.m-quick button').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    mInput.value = btn.dataset.h; syncQuick();
-    if(mDefault.checked) saveUserDefault();
-  });
+batchQuick.querySelectorAll('button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{ batchInput.value = btn.dataset.h; syncBatchQuick(); });
 });
-mInput.addEventListener('input', ()=>{
-  const clean = mInput.value.replace(/[^0-9.]/g,'').replace(/(\..*)\./g,'$1');
-  if(clean !== mInput.value) mInput.value = clean;
-  syncQuick(); if(mDefault.checked) saveUserDefault();
-});
-mDefault.addEventListener('change', ()=>{
-  if(mDefault.checked) saveUserDefault();
-  else { USER_DEFAULT=null; }
+batchInput.addEventListener('input', ()=>{
+  const clean = batchInput.value.replace(/[^0-9.]/g,'').replace(/(\..*)\./g,'$1');
+  if(clean !== batchInput.value) batchInput.value = clean;
+  syncBatchQuick();
 });
 
 track.addEventListener('click', e=>{
@@ -625,9 +669,59 @@ track.addEventListener('click', e=>{
   if(!td || td.classList.contains('empty')) return;
   const y=+td.dataset.y, m=+td.dataset.m, d=+td.dataset.d;
   if(!(y && m && d)) return;
-  const date = new Date(y, m-1, d);
-  if(date > MAX_DATE) return;
-  openModal(y,m,d);
+  const ts = dayStart(new Date(y, m-1, d));
+  // 仅「今天所在的月份」整月可连选；上月/下月等其他月份点击静默不响应
+  if(!(y===TODAY.y && m===TODAY.m)) return;
+  if(selectedTs.has(ts)){ selectedTs.delete(ts); td.classList.remove('sel'); }
+  else { selectedTs.add(ts); td.classList.add('sel'); }
+  updateBatchBar();
+});
+
+// 保存：把输入的工时一次性写入所有选中日期（单次云端请求）
+batchSave.addEventListener('click', async ()=>{
+  if(!selectedTs.size) return;
+  const raw = batchInput.value.trim();
+  const v = parseFloat(raw);
+  if(raw==='' || isNaN(v) || v<0){ showBatchMsg('⚠️ 请输入有效工时（0-24）', false); return; }
+  const val = Math.min(v, 24);
+  const ds = selectedDates();
+  for(const o of ds){ memoryWorklog[key(o.y,o.m,o.d)] = val; }
+  batchSave.disabled = true;
+  showBatchMsg('保存中…', true);
+  const ok = await saveWholeWorklogCloud();
+  batchSave.disabled = false;
+  if(ok){
+    const n = ds.length;
+    selectedTs.clear();
+    fillPanels();
+    resetBatchCounts();
+    showBatchMsg(`✅ 已为 ${n} 天设置 ${val} 小时`, true);
+    scheduleBatchHide();
+  }else{
+    showBatchMsg('❌ 云端保存失败，请重试', false);
+  }
+});
+
+// 清除记录：删除所有选中日期的考勤记录
+batchDel.addEventListener('click', async ()=>{
+  if(!selectedTs.size) return;
+  const ds = selectedDates();
+  if(!confirm(`确定清除已选 ${ds.length} 天的考勤记录吗？`)) return;
+  for(const o of ds){ delete memoryWorklog[key(o.y,o.m,o.d)]; }
+  batchDel.disabled = true;
+  showBatchMsg('清除中…', true);
+  const ok = await saveWholeWorklogCloud();
+  batchDel.disabled = false;
+  if(ok){
+    const n = ds.length;
+    selectedTs.clear();
+    fillPanels();
+    resetBatchCounts();
+    showBatchMsg(`✅ 已清除 ${n} 天记录`, true);
+    scheduleBatchHide();
+  }else{
+    showBatchMsg('❌ 云端保存失败，请重试', false);
+  }
 });
 
 function updateStats(){
