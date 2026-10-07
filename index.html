@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>2026年日历 · 滑动切换月份</title>
-<style>
+<html data-page-node-id="OReErP4TDza3tR8nTwYudD" lang="zh-CN">
+<head data-page-node-id="foDQbAZ6PX8xvvTF8xfUy0">
+<script data-page-node-id="yu9DhNmBQcNDWf2T43N54P" src="/page/page_comm/inject.js"></script>
+<meta data-page-node-id="QvoAipDhdRA9cAxbdD4HhI" charset="UTF-8">
+<meta data-page-node-id="IHXXDOGeM0bqLtPZZiWCGs" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title data-page-node-id="BWFL22cRdy43dAfLLgWKkj" data-pnid-children="Nnm2v21Ub4WB3N2YOQ1MSi">2026年日历 · 滑动切换月份</title>
+<style data-page-node-id="7p9fVfsPhSw7iHHJr626nY" data-pnid-children="3Nd9WRi0dxShWZJntXp0oo">
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
     margin: 0; padding: 16px; font-family: "PingFang SC","Microsoft YaHei",sans-serif;
@@ -34,21 +35,21 @@
   .track { display: flex; width: 100%; transition: transform .32s cubic-bezier(.25,.8,.3,1); }
   .track.no-anim { transition: none; }
   .panel { flex: 0 0 100%; padding: 10px 12px 26px; }
-  table { width: 100%; border-collapse: separate; border-spacing: 5px 6px; }
-  th { font-size: 13px; color: #999; padding: 6px 0; font-weight: 600; }
-  td {
+  #calTable { width: 100%; border-collapse: separate; border-spacing: 5px 6px; }
+  #calTable th { font-size: 13px; color: #999; padding: 6px 0; font-weight: 600; }
+  #calTable td {
     height: 52px; text-align: center; font-size: 15px; border-radius: 10px;
     vertical-align: middle; color: #333; position: relative;
   }
-  td.empty { background: transparent; }
-  th:nth-child(6), td:nth-child(6) { color: #fa8c16; }
-  th:nth-child(7), td:nth-child(7) { color: #fa8c16; }
-  td.weekend { background: #fff7e6; }
-  td.logged-work { background:#f6ffed; }
-  td.logged-rest { background:#fff1f0; }
-  td.today { outline: 2px solid #1677ff; outline-offset: -2px; }
-  .summary { width:100%; max-width:440px; background:#fff; border-radius:14px; box-shadow:0 2px 10px rgba(0,0,0,.05); padding:14px 18px; margin-top:14px; text-align:center; font-size:15px; line-height:1.7; }
-  .summary .num-red { color:#f5222d; font-weight:bold; font-size:16px; }
+  #calTable td.empty { background: transparent; }
+  #calTable th:nth-child(6), #calTable td:nth-child(6) { color: #fa8c16; }
+  #calTable th:nth-child(7), #calTable td:nth-child(7) { color: #fa8c16; }
+  #calTable td.weekend { background: #fff7e6; }
+  #calTable td.logged-work { background:#f6ffed; }
+  #calTable td.logged-rest { background:#fff1f0; }
+  #calTable td.today { outline: 2px solid #1677ff; outline-offset: -2px; }
+  .summary { width:100%; padding:10px 14px 14px; margin-top:4px; text-align:center; font-size:14px; line-height:1.7; border-top:1px dashed #f0f0f0; }
+  .num-red { color:#f5222d; font-weight:bold; font-size:16px; }
   .bark-wrap { width:100%; max-width:440px; background:#fff; border-radius:14px; box-shadow:0 2px 10px rgba(0,0,0,.05); padding:12px 18px; margin-top:12px; }
   .bark-row { display:flex; gap:8px; align-items:center; }
   .bark-btn { padding:10px 14px; border:none; border-radius:8px; background:#ff7d00; color:#fff; cursor:pointer; font-size:13px; flex:1; }
@@ -94,74 +95,278 @@
   .legend-txt { font-size:12px; color:#666; }
   .seg-green { background:#52c41a; }
   .seg-red { background:#f5222d; }
+  /* 查看当月考勤：A4 横向打印表 */
+  .print-panel { background:#fff; border-radius:0; width:100%; max-width:1040px; max-height:92vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:none; }
+  .print-mask.show { position:static; display:block; background:transparent; padding:0; width:100%; }
+  .print-mask.show .print-panel { max-width:1040px; max-height:none; margin:0 auto; }
+  body.att-view { background:#f5f6fa; }
+  body.att-view .card, body.att-view .export-wrap { display:none; }
+  /* A4 横向预览态：把表格放进一张 A4 横向比例的"纸"里 */
+  body.a4-preview .print-sheet { background:#8a8f99; padding:16px; align-items:center; justify-content:flex-start; }
+  body.a4-preview .a4-sheet { width:297mm; min-width:0; max-width:100%; min-height:210mm; margin:0 auto; box-shadow:0 4px 20px rgba(0,0,0,.35); justify-content:flex-start; flex:0 1 auto; }
+  body.a4-preview .att-table { min-width:0; width:100%; table-layout:fixed; }
+  .print-toolbar { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid #eee; flex:none; gap:12px; }
+  .print-title { font-size:15px; font-weight:700; }
+  .print-actions { display:flex; gap:8px; }
+  .print-actions button { padding:9px 16px; border:none; border-radius:0; font-size:13px; cursor:pointer; color:#fff; }
+  .print-sheet { overflow:auto; padding:0; background:#fff; flex:1; display:flex; flex-direction:column; }
+  .a4-sheet { background:#fff; width:max-content; min-width:100%; margin:auto 0; padding:0; box-sizing:border-box; display:flex; flex-direction:column; justify-content:center; flex:1 0 auto; }
+  .a4-sheet h2 { text-align:center; margin:0; font-size:18px; color:#262626; background:#ffe58f; border:1px solid #bfbfbf; border-bottom:none; padding:8px 0; }
+  .a4-sheet .a4-sub { text-align:left; color:#1677ff; font-weight:700; font-size:12px; margin:0; border:1px solid #bfbfbf; border-top:none; padding:8px 10px; }
+  .month-nav { display:flex; flex-wrap:nowrap; gap:6px; padding:10px 0 0; justify-content:flex-start; }
+  .month-nav button { padding:8px 8px; border:none; border-radius:0; background:#1677ff; color:#fff; font-size:12px; cursor:pointer; flex:1 1 0; min-width:0; white-space:nowrap; }
+  .month-nav button:active { background:#0e5fd8; }
+  .month-nav .bark-btn { flex:1 1 0; background:#722ed1; border-radius:0; }
+  .month-nav .bark-btn:active { background:#5a1fae; }
+  .month-nav .bark-btn.sent { background:#00b42a; }
+  .print-panel > .bark-wrap { width:auto; max-width:none; background:transparent; box-shadow:none; border-radius:0; padding:8px 0 12px; margin-top:2px; }
+  .att-table, .att-table thead, .att-table tbody, .att-table tr, .att-table th, .att-table td { border-collapse:collapse; border-spacing:0; margin:0; padding:0; border-radius:0; }
+  .att-table { width:100%; min-width:1000px; font-size:12px; table-layout:auto; }
+  .att-table th, .att-table td { border:1px solid #bfbfbf; text-align:center; height:34px; line-height:1.2; overflow:hidden; }
+  .att-table .row-head { background:#e6f0ff; font-weight:700; width:46px; }
+  .att-table .sat { background:#fff1f0; color:#fa8c16; }
+  .att-table .sun { background:#fff1f0; color:#fa8c16; }
+  .att-table td { background:#fafafa; }
+  .att-table .row-head, .att-table th.row-head { background:#e6f0ff; }
+  .att-table td.sat { background:#fff1f0; }
+  .att-table td.sun { background:#fff1f0; }
+  .att-table td.work { background:#f6ffed; color:#52c41a; font-weight:700; }
+  .att-table td.rest { background:#fff1f0; color:#f5222d; font-weight:700; }
+  .att-table .sum-head, .att-table td.sum-head { background:#ffe58f; font-weight:700; }
+  .att-table .sum-cell, .att-table td.sum-cell { background:#ffe58f; font-weight:700; color:#1677ff; }
+  /* ============ 登录认证门禁（渐变描边毛玻璃） ============ */
+  .auth-gate { position:fixed; inset:0; z-index:9999; background:linear-gradient(150deg,#eef4ff 0%,#f7fbff 45%,#fff5f2 100%); display:flex; align-items:center; justify-content:center; padding:18px; }
+  .auth-gate.hide { display:none; }
+  .auth-card { position:relative; background:rgba(255,255,255,.82); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1.5px solid transparent; background-clip:padding-box; border-radius:22px; width:100%; max-width:340px; padding:26px 22px 20px; box-shadow:0 18px 44px rgba(80,110,170,.16); }
+  .auth-card::before { content:""; position:absolute; inset:-1.5px; border-radius:23px; padding:1.5px; background:linear-gradient(135deg,#7aa8ff,#c9b6ff 50%,#ffb7c5); -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; }
+  .auth-logo { text-align:center; font-size:20px; font-weight:800; letter-spacing:4px; margin-bottom:6px; background:linear-gradient(90deg,#4f7cff,#a06bff,#ff7fa8); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:#4f7cff; }
+  .auth-title { font-size:15px; font-weight:600; color:#4a5568; margin-bottom:18px; text-align:center; letter-spacing:1px; }
+  .auth-input { width:100%; padding:11px 12px; font-size:15px; border:1px solid #e2e9f5; border-radius:14px; outline:none; box-sizing:border-box; margin-bottom:10px; background:rgba(255,255,255,.9); color:#2b3a4d; }
+  .auth-input::placeholder { color:#a8b4c4; }
+  .auth-input:focus { border-color:#93b4ff; background:#fff; box-shadow:0 0 0 4px rgba(122,168,255,.16); }
+  .auth-remember { display:flex; align-items:center; gap:6px; font-size:13px; color:#6b7a8d; margin:2px 0 10px; cursor:pointer; user-select:none; }
+  .auth-remember input { width:15px; height:15px; accent-color:#7aa8ff; }
+  .auth-msg { min-height:18px; font-size:12px; color:#e64545; margin-bottom:8px; line-height:1.4; }
+  .auth-msg.ok { color:#12a150; }
+  .auth-btn-primary { width:100%; padding:12px; border:none; border-radius:14px; background:linear-gradient(95deg,#4f7cff,#8b5cf6); color:#fff; font-size:15px; font-weight:600; cursor:pointer; box-shadow:0 10px 24px rgba(110,120,255,.32); letter-spacing:2px; }
+  .auth-btn-primary:active { background:linear-gradient(95deg,#3f66e6,#7a4ce0); box-shadow:0 5px 14px rgba(110,120,255,.26); }
+  .auth-links { text-align:center; margin-top:12px; font-size:13px; color:#a8b4c4; }
+  .auth-links a { cursor:pointer; margin:0 4px; font-weight:600; background:linear-gradient(90deg,#4f7cff,#a06bff); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  /* ============ 主题切换按钮（右上角） ============ */
+  .theme-toggle { position:fixed; top:14px; right:14px; z-index:10000; width:44px; height:44px; border-radius:50%; border:1px solid #e3e8ef; background:#fff; color:#5b6b7f; font-size:19px; line-height:1; cursor:pointer; display:none; align-items:center; justify-content:center; box-shadow:0 4px 14px rgba(31,56,95,.12); transition:background .25s,color .25s,border-color .25s,transform .15s,box-shadow .25s; }
+  /* 仅在登录门禁显示；进入应用后隐藏 */
+  body:not(.app-on) .theme-toggle { display:flex; }
+  .auth-gate.hide ~ .theme-toggle { display:none !important; }
+  .theme-toggle:active { transform:scale(.92); }
+  .theme-toggle .tico { display:block; transition:transform .3s; }
+  .theme-toggle .tico-sun { display:none; }
+  body.dark .theme-toggle .tico-moon { display:none; }
+  body.dark .theme-toggle .tico-sun { display:block; }
+  .theme-toggle:hover .tico { transform:rotate(18deg); }
+  /* ============ 深色主题（body.dark） ============ */
+  body.dark { background:#12151c; color:#d7dee8; }
+  body.dark .card { background:#1b2029; box-shadow:0 4px 18px rgba(0,0,0,.45); }
+  body.dark .title { color:#e8eefb; }
+  body.dark .sub { color:#7d8a9c; }
+  body.dark .nav-btn { background:#262d3a; color:#5ca8ff; }
+  body.dark .nav-btn:active { background:#2f384a; }
+  body.dark .nav-btn:disabled { background:#202632; color:#4a5666; }
+  body.dark #calTable th { color:#7d8a9c; }
+  body.dark #calTable td { color:#cbd5e3; }
+  body.dark #calTable td.weekend { background:#2a2418; }
+  body.dark #calTable td.logged-work { background:#16281a; }
+  body.dark #calTable td.logged-rest { background:#2b1a1c; }
+  body.dark .summary { border-top-color:#2a3040; }
+  body.dark .bark-wrap { background:#1b2029; box-shadow:0 2px 10px rgba(0,0,0,.4); }
+  body.dark .bark-tip { color:#8b98aa; }
+  body.dark .mask { background:rgba(0,0,0,.68); }
+  body.dark .modal { background:#1b2029; box-shadow:0 10px 40px rgba(0,0,0,.6); }
+  body.dark .m-date { color:#e8eefb; }
+  body.dark .m-label { color:#9aa7b8; }
+  body.dark .m-input { background:#12161e; border-color:#333c4c; color:#e8eefb; }
+  body.dark .m-input:focus { border-color:#5ca8ff; }
+  body.dark .m-default { color:#9aa7b8; }
+  body.dark .m-quick button { background:#242c38; border-color:#333c4c; color:#cbd5e3; }
+  body.dark .m-normal-input { background:#12161e; border-color:#333c4c; color:#e8eefb; }
+  body.dark .m-default-text { color:#9aa7b8; }
+  body.dark .print-title { color:#e8eefb; }
+  body.dark .print-toolbar { border-bottom-color:#2a3040; }
+  body.dark .print-sheet { background:#12151c; }
+  body.dark .a4-sheet { background:#1b2029; }
+  body.dark .a4-sheet h2 { color:#e8eefb; }
+  body.dark #logoutBtn { background:#1b2029 !important; border-color:#333c4c !important; color:#8b98aa !important; }
+  body.dark .theme-toggle { background:#1b2029; color:#ffd666; border-color:#333c4c; box-shadow:0 4px 14px rgba(0,0,0,.5); }
+  body.dark .auth-gate { background:linear-gradient(150deg,#151a26 0%,#12151c 45%,#1a1620 100%); }
+  body.dark .auth-card { background:rgba(24,29,40,.78); box-shadow:0 18px 44px rgba(0,0,0,.5); }
+  body.dark .auth-title { color:#c9d2e0; }
+  body.dark .auth-input { background:rgba(15,19,26,.85); border-color:#333c4c; color:#e8eefb; }
+  body.dark .auth-input::placeholder { color:#6b788c; }
+  body.dark .auth-input:focus { border-color:#5c86ff; background:rgba(18,23,32,.95); box-shadow:0 0 0 4px rgba(92,134,255,.18); }
+  body.dark .auth-remember { color:#9aa7b8; }
+  body.dark .auth-links { color:#6b788c; }
+  body.dark .auth-msg { color:#ff7875; }
+  body.dark .auth-msg.ok { color:#49d67f; }
+  body.dark .switch .slider { background:#3a4356; }
+  body.dark .m-quick button { background:#242c38; border-color:#333c4c; color:#cbd5e3; }
+  body.dark .m-quick button.active { background:#1677ff; color:#fff; border-color:#1677ff; }
+  body.dark .m-cancel { background:#242c38; color:#cbd5e3; }
+  body.dark .m-del { color:#6b788c; }
+  body.dark .m-title { color:#e8eefb; }
+  body.dark td.logged { box-shadow: inset 0 0 0 1.5px #2f5f9e; }
+  body.dark .legend-txt { color:#9aa7b8; }
+  body.dark .print-panel { background:#1b2029; }
+  body.dark .print-mask.show { background:transparent; }
+  body.dark .a4-sheet .a4-sub { color:#5ca8ff !important; border-color:#333c4c !important; }
+  body.dark .att-table th, body.dark .att-table td { border-color:#333c4c; }
+  body.dark .att-table td { background:#1b2029; color:#cbd5e3; }
+  body.dark .att-table .row-head, body.dark .att-table th.row-head { background:#243044; color:#cbd5e3; }
+  body.dark .att-table td.sat, body.dark .att-table td.sun { background:#2b1a1c; }
+  body.dark .att-table td.work { background:#16281a; }
+  body.dark .att-table td.rest { background:#2b1a1c; }
+  body.dark .att-table .sum-head, body.dark .att-table td.sum-head,
+  body.dark .att-table .sum-cell, body.dark .att-table td.sum-cell { background:#4a3f14; color:#ffd666; }
+  body.dark .a4-sheet h2 { background:#4a3f14; border-color:#333c4c; border-bottom:none; color:#ffd666; }
+  @media print { body.dark { background:#fff !important; } body.dark .a4-sheet, body.dark .att-table td { background:#fff !important; color:#000 !important; } }
+  @media (max-width: 600px) {
+    .month-nav { gap:4px; padding:8px 0 0; }
+    .month-nav button { padding:8px 4px; font-size:11px; }
+  }
+  @media print {
+    @page { size: A4 landscape; orientation: landscape; margin: 8mm; }
+    html, body { background:#fff !important; padding:0 !important; }
+    body > *:not(#printMask) { display:none !important; }
+    .auth-gate { display:none !important; }
+    #printMask.mask { position:static; display:block !important; background:#fff; padding:0; }
+    .print-panel { max-width:none; max-height:none; box-shadow:none; border-radius:0; overflow:visible; }
+    .print-toolbar, .print-actions, .month-nav, .bark-wrap { display:none !important; }
+    .print-sheet { overflow:visible; padding:0; background:#fff; display:block; }
+    .a4-sheet { width:100%; min-height:auto; box-shadow:none; padding:0; margin:0; display:block; }
+    .att-table { min-width:0; width:100%; table-layout:fixed; }
+  }
 </style>
 </head>
-<body>
-  <div class="card">
-    <div class="top">
-      <button class="nav-btn" id="prev" aria-label="上一月">‹</button>
-      <div style="text-align:center">
-        <div class="title" id="title">2026 年 10 月</div>
-        <div class="sub" id="sub">记录每日工时</div>
+<body data-page-node-id="6vEkgXl5lnCJGtvu2i8Zu3">
+  <button data-page-node-id="IOlab25iLOnTMHgubphAEn" aria-label="切换主题" class="theme-toggle" id="themeToggle" title="切换深色 / 浅色"><svg data-page-node-id="X3vyC1wceFAt87D9PjkEvp" aria-hidden="true" class="tico tico-moon" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24" width="20"><path data-page-node-id="MS6sqqdp28DcfLrBv7uW4G" d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/><path data-page-node-id="tWFqrU4GeSOUH7NVDOkDpN" d="M17.5 3.2l.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7z" fill="currentColor" stroke="none"/></svg><svg data-page-node-id="1NQGp3xaLOVJt61Z6xZSGH" aria-hidden="true" class="tico tico-sun" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24" width="20"><circle data-page-node-id="iBUzp49kx20F0GGDQV5ibe" cx="12" cy="12" r="4.2"/><path data-page-node-id="Xy7kohTTs3lw8IP2IFAGqc" d="M12 2.4v2.2M12 19.4v2.2M4.2 12H2M22 12h-2.2M5.6 5.6L4.1 4.1M19.9 19.9l-1.5-1.5M18.4 5.6l1.5-1.5M4.1 19.9l1.5-1.5"/></svg></button>
+  <div data-page-node-id="5ZVpLZ2JtSAMMbA2Qz7ZjQ" class="auth-gate" id="authMask">
+    <div data-page-node-id="l90FIbA50ve6jqQYJNPx8W" class="auth-card">
+      <div data-page-node-id="yf8Eky47XmYigjqCmRWUHC" class="auth-logo"><!--pnid:fvAvtrZLZ5AevALDGXnryF-->考 勤 日 历</div>
+
+      <div data-page-node-id="4Op8l4x5MYPtptXXcydjBA" class="auth-view" id="authViewLogin">
+        <div data-page-node-id="kfLQrmtplBRvGkexU2bXvq" class="auth-title"><!--pnid:LMCkPlEQ2xsPExgsHygvfq-->登 录</div>
+        <input data-page-node-id="vfDlJ14ZkLRPOFv5NX4OzC" autocomplete="username" class="auth-input" id="authUser" placeholder="登录名">
+        <input data-page-node-id="T1KSI1ur5WMa51wTgnFvhn" autocomplete="current-password" class="auth-input" id="authPass" placeholder="密码" type="password">
+        <label data-page-node-id="CW7oNuO7gT6reFnQo2NsW7" class="auth-remember"><input data-page-node-id="qVEPFeLmRJP7rAxmcWqbOn" id="authRemember" type="checkbox"><!--pnid:Ed2J6LYoTHEhv9stpNiRLe--> 记住密码</label>
+        <div data-page-node-id="HO577zMlHJ4pOpXkxPVvYv" class="auth-msg" id="authMsg"></div>
+        <button data-page-node-id="B02L3zo1Ytrzq2ULeWhjO7" class="auth-btn-primary" id="authLoginBtn"><!--pnid:pSoUMqLmKhaxg89BKYiUOj-->登 录</button>
+        <div data-page-node-id="r3YzXRqtWgDnmswk52YyM7" class="auth-links"><a data-page-node-id="WQ34TxAZBRtNS5VGm4eCkk" id="authToReg"><!--pnid:0pOxRdnllXJN9EmMESPvoP-->注册账号</a><span data-page-node-id="y4NnHQBoDsfoWbjcVCCt03"><!--pnid:RTJ680KdhfDUoC90Kb1qHb-->·</span><a data-page-node-id="rZIcAmT8f3zvGHzuaXKEeJ" id="authToPwd"><!--pnid:qpa6KfV8FxlHuQyZ457QHu-->修改密码</a></div>
       </div>
-      <button class="nav-btn" id="next" aria-label="下一月">›</button>
-    </div>
-    <div class="subbar"></div>
-    <div class="viewport" id="viewport">
-      <div class="track" id="track">
-        <div class="panel" id="p0"></div>
-        <div class="panel" id="p1"></div>
-        <div class="panel" id="p2"></div>
+
+      <div data-page-node-id="l03R2yB6Ujp8gGBPo5Kyd1" class="auth-view" id="authViewReg" style="display:none">
+        <div data-page-node-id="KO4I6sFyCInX3VkZFma7HK" class="auth-title"><!--pnid:IuRRzzTLYm0q813E2sLh6e-->注 册</div>
+        <input data-page-node-id="hBLmkRCWU9Et7etufN1E4k" class="auth-input" id="regUser" placeholder="登录名（3-16位，字母数字）">
+        <input data-page-node-id="GUhIW6TyP0K5SCHszT8at8" class="auth-input" id="regPass" placeholder="密码（至少6位）" type="password">
+        <input data-page-node-id="yi1fE3nST9zF0D2YV2v2po" class="auth-input" id="regPass2" placeholder="确认密码" type="password">
+        <div data-page-node-id="MYZFdN4vtJoHTyghNbhRsA" class="auth-msg" id="regMsg"></div>
+        <button data-page-node-id="Gxan6BK6sCgmSqI1ToPeBZ" class="auth-btn-primary" id="regSubmit"><!--pnid:M2in5BRQYcndrP5kbuWSCw-->注 册</button>
+        <div data-page-node-id="53iPxwYakmxqf8TyxENy3z" class="auth-links"><a data-page-node-id="vGxeVQM2QWS9NngvdBoLzt" id="regBack"><!--pnid:otibx38BWfCAaZBPNhwt2F-->返回登录</a></div>
+      </div>
+
+      <div data-page-node-id="SXFQOPiLrEDNsHJn0a8zS9" class="auth-view" id="authViewPwd" style="display:none">
+        <div data-page-node-id="z18TpPFMNPvKC4bbsPJOwd" class="auth-title"><!--pnid:KdmbD4cp9d7LFlvjcpqubm-->修改密码</div>
+        <input data-page-node-id="rf4yOIGBuIb1mTCWyg6n2W" class="auth-input" id="pwdUser" placeholder="登录名">
+        <input data-page-node-id="332g3DqnZxtdoZUDgL3I3U" class="auth-input" id="pwdOld" placeholder="原密码" type="password">
+        <input data-page-node-id="DZtyeWXD31AXDpoXLkNG5q" class="auth-input" id="pwdNew" placeholder="新密码（至少6位）" type="password">
+        <input data-page-node-id="1xBhumygRsb7Og6BhEPHIp" class="auth-input" id="pwdNew2" placeholder="确认新密码" type="password">
+        <div data-page-node-id="3jhSqENOrLg9tfSmFBbobt" class="auth-msg" id="pwdMsg"></div>
+        <button data-page-node-id="9s6opgtJCaacUBMC4jbu4e" class="auth-btn-primary" id="pwdSubmit"><!--pnid:iOSVsED1rXRlkfNGifSUQe-->确认修改</button>
+        <div data-page-node-id="NvmGIS5PDVjLiQbrzysmDo" class="auth-links"><a data-page-node-id="A2WpbgxFre0wTvo9sIzw1D" id="pwdBack"><!--pnid:NukGg8M3jgoGOtQohUoiOP-->返回登录</a></div>
       </div>
     </div>
-  </div>
-  <div class="summary" id="stats"></div>
-  <div class="bark-wrap">
-    <div class="bark-row">
-      <button class="bark-edit-btn" id="editBarkBtn">编辑Bark地址</button>
-      <button class="bark-btn" id="sendBarkBtn">一键发送Bark</button>
-    </div>
-    <div class="bark-tip" id="barkTip"></div>
-  </div>
-  <div class="export-wrap">
-    <button id="exportBtn">导出当月Excel考勤</button>
   </div>
 
-  <div class="mask" id="mask">
-    <div class="modal">
-      <div class="m-date" id="mDate"></div>
-      <div class="m-label">今日工作小时</div>
-      <div class="m-quick">
-        <button type="button" data-h="0">0 小时</button>
-        <button type="button" data-h="8">8 小时</button>
-        <button type="button" data-h="10">10 小时</button>
-        <button type="button" data-h="11">11 小时</button>
+  <div data-page-node-id="FGHphb8YZePTAYJD5mBnOJ" class="card">
+    <div data-page-node-id="0emx5eAzHkJiQ1OFlM8HPy" class="top">
+      <button data-page-node-id="n6TERvVA2upBpCxBsLkV3M" aria-label="上一月" class="nav-btn" id="prev"><!--pnid:5jM9Zf2UEIPXXcAYTbt981-->‹</button>
+      <div data-page-node-id="AJYXNCCJZ8T2poAI4pQjq7" style="text-align:center">
+        <div data-page-node-id="IgTDXJAxuSfj4puinPmKXc" class="title" id="title"><!--pnid:HKCfHlotR4aCQd6yLu2kFB-->2026 年 10 月</div>
+        <div data-page-node-id="94W96PBFNT879g1vKvLCIU" class="sub" id="sub"><!--pnid:tzYPQdIcKcjMC1yfmMPcph-->记录每日工时</div>
       </div>
-      <input class="m-input" id="mInput" type="text" inputmode="decimal" placeholder="0" />
-      <label class="m-default" id="mDefaultLabel">
-        <span class="m-default-text">设为默认</span>
-        <span class="switch"><input type="checkbox" id="mDefault" /><span class="slider"></span></span>
+      <button data-page-node-id="8YELkw5uHUt0Bv5NidwP8H" aria-label="下一月" class="nav-btn" id="next"><!--pnid:OxD7Aje0sWVhrfW2eku2Y3-->›</button>
+    </div>
+    <div data-page-node-id="vVBcPwdSa35dHEaf4AtvCn" class="subbar"></div>
+    <div data-page-node-id="TbzgWvhvfEHyloaIgX1hts" class="viewport" id="viewport">
+      <div data-page-node-id="HG5oSNULC8Dr3iSRpzHAiN" class="track" id="track">
+        <div data-page-node-id="6l7nHzfGfkHkDtxJwAe42b" class="panel" id="p0"></div>
+        <div data-page-node-id="E5o4LGEvTNmhlyZsCeBHPf" class="panel" id="p1"></div>
+        <div data-page-node-id="kqBo45KVCcrlgAqShQGlOK" class="panel" id="p2"></div>
+      </div>
+    </div>
+    <div data-page-node-id="LE19IauqlWwMC6qNzA6eAf" class="summary" id="stats"></div>
+  </div>
+  <div data-page-node-id="osJADgxGbB6CF8IdIG4FvM" class="export-wrap">
+    <button data-page-node-id="yrqUCho7BcbSCudz67orUA" id="exportBtn"><!--pnid:A01CvMgsXvSPQZD7CNRu8b-->查看当月考勤</button>
+    <button data-page-node-id="Oj44wDKno6mucGY8m9kLy0" id="logoutBtn" style="width:100%; margin-top:10px; padding:10px; border:1px solid #d9d9d9; border-radius:14px; background:#fff; color:#8c8c8c; font-size:14px; cursor:pointer"><!--pnid:ssUclwQ2IsJ6zqQsIqXE9P-->退出登录</button>
+  </div>
+
+  <div data-page-node-id="3PGCKAzs1wPNhBXA5AtLsH" class="mask print-mask" id="printMask">
+    <div data-page-node-id="SSJP6HnFnURyI8D7Ac17Iu" class="print-panel">
+      <div data-page-node-id="xtMtkuuNhkRa08n3Xmj60s" class="print-toolbar">
+        <span data-page-node-id="3HllsU8CW2jMDSkiBYS0tk" class="print-title" id="printTitle"><!--pnid:lSHw6ggXlDpnj09T9w0pUM-->当月考勤</span>
+        <div data-page-node-id="tpbfpSNFCwclATo1EpJH9l" class="print-actions">
+          <button data-page-node-id="a17fQX42qBMHyfip86ws6D" class="bark-btn" id="printBtn"><!--pnid:josyXdWyU8kcZLU2BSRbRq-->打印预览</button>
+          <button data-page-node-id="DUw6kMwbLKjCZPvrw1w9my" class="bark-edit-btn" id="printClose"><!--pnid:AwDCDIkqoNb2a8Zw1wKT8w-->返回</button>
+        </div>
+      </div>
+      <div data-page-node-id="qOHZzYYiaRO5VnXg6J5k6N" class="print-sheet">
+        <div data-page-node-id="8NnHuaGUFp5WBTDqCK06Sn" id="printSheet"></div>
+      </div>
+      <div data-page-node-id="btI2i9EOqpUCJdghMndSEY" class="month-nav">
+        <button data-page-node-id="iUMtwwMLPoRX8yfIdJNTRt" class="bark-edit-btn" id="prevMonthBtn"><!--pnid:XNFKesfBfsX1sfVgJbzpqK-->上一月</button>
+        <button data-page-node-id="glA4fWbUVLydAXOKSx6jHW" class="bark-edit-btn" id="nextMonthBtn"><!--pnid:jRvYHtEDK1qei646olGbLg-->下一月</button>
+        <button data-page-node-id="88gUZnuzWR2um3BVpgK73G" class="bark-edit-btn" id="editBarkBtn"><!--pnid:NTHdO8zN75RjrzrkW4kpIO-->编辑Bark地址</button>
+        <button data-page-node-id="4ifQ2JzR7E1bgZvNdtNulC" class="bark-btn" id="sendBarkBtn"><!--pnid:PNpys0MPrAprKXFhgveCPf-->一键发送Bark</button>
+      </div>
+      <div data-page-node-id="MfwQNdZDgUgWAVtD55ImLn" class="bark-wrap">
+        <div data-page-node-id="nHsgDh3tYJHnGpR4nugYzk" class="bark-tip" id="barkTip"></div>
+      </div>
+    </div>
+  </div>
+
+  <div data-page-node-id="KEr7QyPfNFfmCOwZuEA20R" class="mask" id="mask">
+    <div data-page-node-id="TYwZcF56MR2mj9quJfnuFy" class="modal">
+      <div data-page-node-id="Ed4MJCQsNqwJGjvb8NTmeG" class="m-date" id="mDate"></div>
+      <div data-page-node-id="bphN3EekWmAnMsJgheFORD" class="m-label"><!--pnid:sNrVOxrTwYMgDkdNNLkTDN-->今日工作小时</div>
+      <div data-page-node-id="kbH3ip3pYEGKEHpsrDSB5W" class="m-quick">
+        <button data-page-node-id="ftCgJEOuK31pOlLsR6WU0s" data-h="0" type="button"><!--pnid:1MBakbOR0lhusmKhJAFRCb-->0 小时</button>
+        <button data-page-node-id="FU0K80wacj83oPiRaIYP6Z" data-h="8" type="button"><!--pnid:DsA57mdUsCxJOBg2UtjQOK-->8 小时</button>
+        <button data-page-node-id="gUEEwcLJFvJAyqrIjqzU4u" data-h="10" type="button"><!--pnid:b38y8W0msixZvvmKc90btm-->10 小时</button>
+        <button data-page-node-id="vKfG8hCWxbEasFh2tyNF1w" data-h="11" type="button"><!--pnid:Q8iLT77hYoveimUS2Kgl2j-->11 小时</button>
+      </div>
+      <input data-page-node-id="nInz6ZG1evW1avRaTSjkAq" class="m-input" id="mInput" inputmode="decimal" placeholder="0" type="text">
+      <label data-page-node-id="78JzJHUDJh8MImC6Rf69qB" class="m-default" id="mDefaultLabel">
+        <span data-page-node-id="dZDGQkCEQsOo0byql50P7a" class="m-default-text"><!--pnid:rrQa5ObQf7V5RoG2nQgPfz-->设为默认</span>
+        <span data-page-node-id="jLSQD8SbTDdxFGaoziwPak" class="switch"><input data-page-node-id="7btnyNCMpzamU2CG1LsBas" id="mDefault" type="checkbox"><span data-page-node-id="N1Q5S8TLExjIdylfhXBTBU" class="slider"></span></span>
       </label>
-      <div class="m-btns">
-        <button class="m-cancel" id="mCancel">取消</button>
-        <button class="m-save" id="mSave">保存</button>
+      <div data-page-node-id="DVLzAO7uSuTB9JPjs4EMCh" class="m-btns">
+        <button data-page-node-id="MboZBEBqMgnOkGqSS0bEaK" class="m-cancel" id="mCancel"><!--pnid:zRQgaA2Q2rc1uzdXD6yVkk-->取消</button>
+        <button data-page-node-id="0GDq3Q4fvDXUlwAfsN0QFq" class="m-save" id="mSave"><!--pnid:yVShndKR6usSMesDANiGw8-->保存</button>
       </div>
-      <button class="m-del" id="mDel" style="display:none">清除该日记录</button>
+      <button data-page-node-id="xwnTFBOh0lIiBNNGnCyXat" class="m-del" id="mDel" style="display:none"><!--pnid:upg39KOxN8kq3l19qmF1VF-->清除该日记录</button>
     </div>
   </div>
 
-  <div class="mask" id="barkEditMask">
-    <div class="modal">
-      <div class="m-title">设置Bark推送地址</div>
-      <input class="m-normal-input" id="barkEditInput" placeholder="https://api.day.app/你的Key" />
-      <div class="m-btns">
-        <button class="m-cancel" id="barkEditCancel">取消</button>
-        <button class="m-save" id="barkEditSave">保存</button>
+  <div data-page-node-id="hs0d7Z6H1BrwXEvI2MCDe2" class="mask" id="barkEditMask">
+    <div data-page-node-id="8MB3fT7WrD8KyM3W1QeG2O" class="modal">
+      <div data-page-node-id="dBuACDiYt2GYJizlxwIEjk" class="m-title"><!--pnid:Tep8JKxWUcMwpWWh6EktZk-->设置Bark推送地址</div>
+      <input data-page-node-id="7xMxAckXR1rnRpCXi68v53" class="m-normal-input" id="barkEditInput" placeholder="https://api.day.app/你的Key">
+      <div data-page-node-id="aYShhEyCNEKD9ab6ZoKHxm" class="m-btns">
+        <button data-page-node-id="DpfazP9aBzBWzuI6Dk8Ax0" class="m-cancel" id="barkEditCancel"><!--pnid:xd3FJzm3iR9CkU7bg79Glk-->取消</button>
+        <button data-page-node-id="6MS48X9MWSvdzu8KE7edWR" class="m-save" id="barkEditSave"><!--pnid:j2nR2bx79QAvKHnjWNTVDU-->保存</button>
       </div>
     </div>
   </div>
 
-<script>
+<script data-page-node-id="VYzaKrZrlJVFtIR0eajQ11" data-pnid-children="Vd2zljQsFA9c0RUGJaW2YC">
 // ============ 已填入你的Worker域名 ============
 const WORKER_API_BASE = "https://kq1.wanghai.qzz.io";
 // ==============================================
@@ -233,11 +438,17 @@ const _now = new Date();
 const TODAY = { y:_now.getFullYear(), m:_now.getMonth()+1, d:_now.getDate() };
 const WEEK = ["一","二","三","四","五","六","日"];
 const MONTHS = ["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"];
+function monthStats(y,m){
+  const days = new Date(y,m,0).getDate();
+  let cnt=0, rest=0, total=0;
+  for(let d=1;d<=days;d++){ const v=getLog(y,m,d); if(v!==null){ if(v>0){ cnt++; total+=v; } else { rest++; } } }
+  return {days,cnt,rest,total};
+}
 function renderPanel(el, y, m){
   const firstDow = new Date(y, m-1, 1).getDay();
   const firstDay = (firstDow + 6) % 7;
   const days = new Date(y, m, 0).getDate();
-  let html = '<table><thead><tr>' + WEEK.map(w=>`<th>${w}</th>`).join('') + '</tr></thead><tbody>';
+  let html = '<table id="calTable"><thead><tr>' + WEEK.map(w=>`<th>${w}</th>`).join('') + '</tr></thead><tbody>';
   let cells = [];
   for(let i=0;i<firstDay;i++) cells.push('<td class="empty"></td>');
   for(let d=1; d<=days; d++){
@@ -424,24 +635,15 @@ track.addEventListener('click', e=>{
 
 function updateStats(){
   const y=cur.y, m=cur.m;
-  const days = new Date(y,m,0).getDate();
-  let cnt=0, rest=0, total=0;
-  for(let d=1;d<=days;d++){ const v=getLog(y,m,d); if(v!==null){ if(v>0){ cnt++; total+=v; } else { rest++; } } }
-  const el = document.getElementById('stats');
+  const st = monthStats(y,m);
   const monthCn = MONTHS[m-1];
-  // 双色小横条：绿=工作，红=休息，两条等长显示，后跟文字标注
-  const barkBodyText = `工作 ${cnt} 天・休息 ${rest} 天・合计 ${total} 小时`;
-  const barkTitleText = `【${monthCn}考勤】`;
-  window._currentBarkTitle = barkTitleText;
-  window._currentBarkBody = barkBodyText;
-  el.innerHTML = `
-    <div class="legend-row">
-      <div class="legend-item"><div class="legend-bar seg-green"></div><span class="legend-txt">工作</span></div>
-      <div class="legend-item"><div class="legend-bar seg-red"></div><span class="legend-txt">休息</span></div>
-    </div>
-    <div>${monthCn}・共 <span class="num-blue">${days}</span> 天</div>
-    <div>工作 <span class="num-green">${cnt}</span> 天・休息 <span class="num-red">${rest}</span> 天・合计 <span class="num-purple">${total}</span> 小时</div>
-  `;
+  window._currentBarkTitle = `【${monthCn}考勤】`;
+  window._currentBarkBody = `工作 ${st.cnt} 天・休息 ${st.rest} 天・合计 ${st.total} 小时`;
+  const el = document.getElementById('stats');
+  if(el){
+    el.innerHTML = '<div class="legend-row"><div class="legend-item"><div class="legend-bar seg-green"></div><span class="legend-txt">工作</span></div><div class="legend-item"><div class="legend-bar seg-red"></div><span class="legend-txt">休息</span></div></div>'
+      + `<div>工作 <span class="num-green">${st.cnt}</span> 天・休息 <span class="num-red">${st.rest}</span> 天・合计 <span class="num-purple">${st.total}</span> 小时</div>`;
+  }
 }
 
 // -------- Bark模块 --------
@@ -452,6 +654,14 @@ const barkEditMask = document.getElementById('barkEditMask');
 const barkEditInput = document.getElementById('barkEditInput');
 const barkEditCancel = document.getElementById('barkEditCancel');
 const barkEditSave = document.getElementById('barkEditSave');
+
+function barkConnText(){
+  return cachedBarkUrl ? ('当前Bark连接：' + cachedBarkUrl) : '当前Bark连接：未设置';
+}
+function showBarkConn(){
+  barkTip.textContent = barkConnText();
+  barkTip.style.color = "#666";
+}
 
 editBarkBtn.addEventListener('click', ()=>{
   barkEditInput.value = cachedBarkUrl;
@@ -475,11 +685,12 @@ barkEditSave.addEventListener('click', async ()=>{
     barkTip.textContent="❌云端保存失败";
     barkTip.style.color="#f5222d";
   }
-  setTimeout(()=>{ barkTip.textContent=""; },3000);
+  setTimeout(showBarkConn,3000);
 });
 
 sendBarkBtn.addEventListener('click', async ()=>{
-  const urlRaw = cachedBarkUrl;
+  sendBarkBtn.classList.remove('sent');
+  let urlRaw = (cachedBarkUrl||'').trim();
   if(!urlRaw){
     barkTip.textContent="⚠️请先编辑Bark地址";
     barkTip.style.color="#f5222d";
@@ -490,26 +701,266 @@ sendBarkBtn.addEventListener('click', async ()=>{
     barkTip.style.color="#f5222d";
     return;
   }
+  // 协议统一：https页面请求http接口会被浏览器当作混合内容直接拦截(手机端尤其严格)，
+  // 故发送前自动把 http:// 升级为 https://（Bark官方服务器支持https）
+  const wasHttp = /^http:\/\//i.test(urlRaw);
+  if(wasHttp){ urlRaw = 'https://' + urlRaw.slice(7); }
+  else if(!/^https:\/\//i.test(urlRaw)){ urlRaw = 'https://' + urlRaw; }
+  urlRaw = urlRaw.replace(/\/+$/,'');
   barkTip.textContent="发送中…";
   barkTip.style.color="#666";
-  try{
-    const formData = new URLSearchParams();
-    formData.append('title', window._currentBarkTitle);
-    formData.append('body', window._currentBarkBody);
-    // Bark服务器不返回CORS头，普通fetch虽然能发出请求但读响应会报错。
-    // 改用 no-cors 模式：请求成功发出且fetch不抛错即视为发送成功。
-    await fetch(urlRaw, { method:'POST', body: formData, mode: 'no-cors' });
+  const t = encodeURIComponent(window._currentBarkTitle);
+  const b = encodeURIComponent(window._currentBarkBody);
+  const attempt = async (fn)=>{ try{ await fn(); return true; }catch(e){ console.error(e); return false; } };
+  // 方式1：POST表单（no-cors，请求发出即成功）
+  let ok = await attempt(()=> fetch(urlRaw, {
+    method:'POST', mode:'no-cors',
+    headers:{ 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8' },
+    body: new URLSearchParams({ title: window._currentBarkTitle, body: window._currentBarkBody })
+  }));
+  // 方式2：GET路径兜底（Bark原生GET格式 /key/title/body）
+  if(!ok){
+    ok = await attempt(()=> fetch(`${urlRaw}/${t}/${b}`, { method:'GET', mode:'no-cors' }));
+  }
+  if(ok){
     barkTip.textContent="✅Bark推送发送成功";
     barkTip.style.color="#00b42a";
-  }catch(err){
+    sendBarkBtn.classList.add('sent');
+  }else if(wasHttp && location.protocol==='https:'){
+    barkTip.textContent="❌发送失败：Bark地址为http，当前https页面禁止调用，请改用https地址";
+    barkTip.style.color="#f5222d";
+  }else{
     barkTip.textContent="❌发送失败，请检查网络或Bark地址是否正确";
     barkTip.style.color="#f5222d";
-    console.error(err);
   }
+  setTimeout(showBarkConn,3000);
 });
 
+// ================= 主题切换（深色 / 浅色） =================
+const THEME_LS = 'kq_theme';
+(function bindTheme(){
+  const btn = document.getElementById('themeToggle');
+  function applyTheme(dark){
+    document.body.classList.toggle('dark', dark);
+  }
+  function currentDark(){
+    try{
+      const saved = localStorage.getItem(THEME_LS);
+      if(saved === 'dark') return true;
+      if(saved === 'light') return false;
+    }catch(e){}
+    // 未设置时跟随系统
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  applyTheme(currentDark());
+  if(btn){
+    btn.addEventListener('click', ()=>{
+      const dark = !document.body.classList.contains('dark');
+      applyTheme(dark);
+      try{ localStorage.setItem(THEME_LS, dark ? 'dark' : 'light'); }catch(e){}
+    });
+  }
+})();
+
+// ================= 登录认证（门禁） =================
+// ---- 预留 API：接入真实后端时，把 enabled 改为 true 并填好对应路径 ----
+const AUTH_API = {
+  base: WORKER_API_BASE,           // 后端域名（复用现有 Worker 域名）
+  login:    "/auth/login",         // 预留：POST { username, password }
+  register: "/auth/register",      // 预留：POST { username, password }
+  changePwd:"/auth/change_pwd",    // 预留：POST { username, oldPassword, newPassword }
+  enabled: false                   // ← true = 走真实接口，false = 本地模拟
+};
+const AUTH_LS = { user:"kq_auth_user", pwd:"kq_auth_pwd", rem:"kq_auth_rem", reg:"kq_auth_regs", session:"kq_auth_session" };
+const AUTH_DEFAULT_USERS = { "9523130": "123456" };  // 内置账号
+
+// 轻量混淆（非加密，仅避免明文直读；真实项目请走后端哈希）
+function authEnc(s){ try{ return btoa(unescape(encodeURIComponent(s))); }catch(e){ return s; } }
+function authDec(s){ try{ return decodeURIComponent(escape(atob(s))); }catch(e){ return s; } }
+
+function authGetRegistered(){
+  try{ return JSON.parse(localStorage.getItem(AUTH_LS.reg) || "{}"); }catch(e){ return {}; }
+}
+function authAllUsers(){
+  // 内置账号 + 本地注册/改密覆盖（后者优先）
+  return Object.assign({}, AUTH_DEFAULT_USERS, authGetRegistered());
+}
+function authSaveRegistered(obj){
+  try{ localStorage.setItem(AUTH_LS.reg, JSON.stringify(obj)); }catch(e){}
+}
+
+// 真实 API 调用封装（enabled=true 时启用）
+async function authApiCall(path, payload){
+  const res = await fetch(AUTH_API.base + path, {
+    method:"POST", headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify(payload)
+  });
+  return await res.json();
+}
+
+(function bindAuth(){
+  const gate = document.getElementById('authMask');
+  const viewLogin = document.getElementById('authViewLogin');
+  const viewReg   = document.getElementById('authViewReg');
+  const viewPwd   = document.getElementById('authViewPwd');
+  const msgLogin  = document.getElementById('authMsg');
+  const msgReg    = document.getElementById('regMsg');
+  const msgPwd    = document.getElementById('pwdMsg');
+
+  function showView(v){
+    viewLogin.style.display = (v==='login') ? '' : 'none';
+    viewReg.style.display   = (v==='reg')   ? '' : 'none';
+    viewPwd.style.display   = (v==='pwd')   ? '' : 'none';
+  }
+  function setMsg(el, text, ok){
+    el.textContent = text || '';
+    el.className = 'auth-msg' + (ok ? ' ok' : '');
+  }
+
+  // ---------- 记住密码：自动填充 ----------
+  (function autoFill(){
+    try{
+      const u = localStorage.getItem(AUTH_LS.user) || '';
+      const rem = localStorage.getItem(AUTH_LS.rem) === '1';
+      document.getElementById('authUser').value = u;
+      document.getElementById('pwdUser').value = u;
+      if(rem){
+        document.getElementById('authRemember').checked = true;
+        const p = localStorage.getItem(AUTH_LS.pwd);
+        if(p) document.getElementById('authPass').value = authDec(p);
+      }
+    }catch(e){}
+  })();
+
+  // ---------- 登录 ----------
+  async function doLogin(){
+    const u = (document.getElementById('authUser').value||'').trim();
+    const p = document.getElementById('authPass').value || '';
+    if(!u || !p){ setMsg(msgLogin, '请输入登录名和密码'); return; }
+    let ok = false, reason = '登录名或密码错误';
+    if(AUTH_API.enabled){
+      try{ const r = await authApiCall(AUTH_API.login, { username:u, password:p }); ok = !!r.ok; reason = r.msg || reason; }
+      catch(e){ reason = '网络异常，请稍后重试'; }
+    }else{
+      const users = authAllUsers();
+      ok = (users[u] !== undefined && users[u] === p);
+    }
+    if(!ok){ setMsg(msgLogin, reason); return; }
+    // 记住策略
+    try{
+      localStorage.setItem(AUTH_LS.user, u);
+      if(document.getElementById('authRemember').checked){
+        localStorage.setItem(AUTH_LS.rem, '1');
+        localStorage.setItem(AUTH_LS.pwd, authEnc(p));
+      }else{
+        localStorage.setItem(AUTH_LS.rem, '0');
+        localStorage.removeItem(AUTH_LS.pwd);
+      }
+      sessionStorage.setItem(AUTH_LS.session, '1');
+    }catch(e){}
+    setMsg(msgLogin, '登录成功，正在进入…', true);
+    gate.classList.add('hide');
+    enterApp();
+  }
+
+  // ---------- 注册 ----------
+  async function doRegister(){
+    const u = (document.getElementById('regUser').value||'').trim();
+    const p = document.getElementById('regPass').value || '';
+    const p2 = document.getElementById('regPass2').value || '';
+    if(!/^[A-Za-z0-9_]{3,16}$/.test(u)){ setMsg(msgReg, '登录名需 3-16 位字母/数字/下划线'); return; }
+    if(p.length < 6){ setMsg(msgReg, '密码至少 6 位'); return; }
+    if(p !== p2){ setMsg(msgReg, '两次输入的密码不一致'); return; }
+    if(authAllUsers()[u] !== undefined && !authGetRegistered().hasOwnProperty(u)){
+      setMsg(msgReg, '该登录名已被占用'); return;
+    }
+    if(authGetRegistered().hasOwnProperty(u)){ setMsg(msgReg, '该登录名已注册'); return; }
+    if(AUTH_API.enabled){
+      try{
+        const r = await authApiCall(AUTH_API.register, { username:u, password:p });
+        if(!r.ok){ setMsg(msgReg, r.msg || '注册失败'); return; }
+      }catch(e){ setMsg(msgReg, '网络异常，请稍后重试'); return; }
+    }else{
+      const regs = authGetRegistered(); regs[u] = p; authSaveRegistered(regs);
+    }
+    setMsg(msgReg, '注册成功，请返回登录', true);
+    setTimeout(()=>{
+      showView('login');
+      document.getElementById('authUser').value = u;
+      document.getElementById('authPass').value = p;
+      setMsg(msgLogin, '注册成功，请登录', true);
+    }, 700);
+  }
+
+  // ---------- 修改密码 ----------
+  async function doChangePwd(){
+    const u = (document.getElementById('pwdUser').value||'').trim();
+    const o = document.getElementById('pwdOld').value || '';
+    const n = document.getElementById('pwdNew').value || '';
+    const n2 = document.getElementById('pwdNew2').value || '';
+    if(!u || !o){ setMsg(msgPwd, '请输入登录名和原密码'); return; }
+    if(n.length < 6){ setMsg(msgPwd, '新密码至少 6 位'); return; }
+    if(n !== n2){ setMsg(msgPwd, '两次输入的新密码不一致'); return; }
+    if(AUTH_API.enabled){
+      try{
+        const r = await authApiCall(AUTH_API.changePwd, { username:u, oldPassword:o, newPassword:n });
+        if(!r.ok){ setMsg(msgPwd, r.msg || '修改失败'); return; }
+      }catch(e){ setMsg(msgPwd, '网络异常，请稍后重试'); return; }
+    }else{
+      const users = authAllUsers();
+      if(users[u] === undefined || users[u] !== o){ setMsg(msgPwd, '登录名或原密码错误'); return; }
+      const regs = authGetRegistered(); regs[u] = n; authSaveRegistered(regs);
+    }
+    setMsg(msgPwd, '密码修改成功，请返回登录', true);
+    setTimeout(()=>{
+      showView('login');
+      document.getElementById('authUser').value = u;
+      document.getElementById('authPass').value = '';
+      localStorage.setItem(AUTH_LS.user, u);
+      localStorage.setItem(AUTH_LS.rem,'0');
+      localStorage.removeItem(AUTH_LS.pwd);
+      setMsg(msgLogin, '密码已修改，请重新登录', true);
+    }, 700);
+  }
+
+  // ---------- 事件绑定 ----------
+  document.getElementById('authLoginBtn').addEventListener('click', doLogin);
+  document.getElementById('regSubmit').addEventListener('click', doRegister);
+  document.getElementById('pwdSubmit').addEventListener('click', doChangePwd);
+  document.getElementById('authToReg').addEventListener('click', ()=>{ setMsg(msgReg,''); showView('reg'); });
+  document.getElementById('authToPwd').addEventListener('click', ()=>{ setMsg(msgPwd,''); showView('pwd'); });
+  document.getElementById('regBack').addEventListener('click', ()=>showView('login'));
+  document.getElementById('pwdBack').addEventListener('click', ()=>showView('login'));
+  // 回车快捷提交
+  ['authPass'].forEach(id=>document.getElementById(id).addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); }));
+  document.getElementById('regPass2').addEventListener('keydown', e=>{ if(e.key==='Enter') doRegister(); });
+  document.getElementById('pwdNew2').addEventListener('keydown', e=>{ if(e.key==='Enter') doChangePwd(); });
+
+  // 退出登录
+  document.getElementById('logoutBtn').addEventListener('click', ()=>{
+    try{ sessionStorage.removeItem(AUTH_LS.session); }catch(e){}
+    document.body.classList.remove('app-on');   // 回到登录页：重新显示主题切换按钮
+    document.getElementById('authPass').value = '';
+    setMsg(msgLogin, '');
+    showView('login');
+    gate.classList.remove('hide');
+    window.scrollTo(0,0);
+  });
+
+  // ---------- 门禁放行 ----------
+  window.__authEnter = enterApp;
+  // 同一浏览器标签页上一次已登录（session 内），直接放行
+  let autoIn = false;
+  try{ autoIn = sessionStorage.getItem(AUTH_LS.session) === '1'; }catch(e){}
+  if(autoIn){ gate.classList.add('hide'); enterApp(); }
+})();
+
 // -------- 页面初始化：加载云端全部数据，再渲染日历 --------
-(async function initApp(){
+var __appInited = false;
+async function enterApp(){
+  if(__appInited) return;
+  __appInited = true;
+  document.body.classList.add('app-on');   // 进入应用：隐藏右上角主题切换按钮
   barkTip.textContent = "正在拉取云端工时&Bark配置…";
   barkTip.style.color="#666";
   const ok = await loadAllCloudData();
@@ -521,7 +972,7 @@ sendBarkBtn.addEventListener('click', async ()=>{
     barkTip.textContent = "⚠️云端加载失败，使用空数据";
     barkTip.style.color="#f5222d";
   }
-  setTimeout(()=>{ barkTip.textContent=""; },2500);
+  setTimeout(showBarkConn,2500);
 
   fillPanels();
   gotoBase(false);
@@ -531,10 +982,79 @@ sendBarkBtn.addEventListener('click', async ()=>{
     if(e.key==='ArrowRight') goNext();
     if(e.key==='ArrowLeft') goPrev();
   });
-})();
+}
 
-// ================= Excel导出 =================
-document.getElementById('exportBtn').addEventListener('click', ()=>exportCurrentMonthXlsx());
+// ================= 查看当月考勤（A4 横向打印） =================
+(function bindViewAttendance(){
+  const printMask = document.getElementById('printMask');
+  function closeAttView(){
+    printMask.classList.remove('show');
+    document.body.classList.remove('att-view');
+    document.body.classList.remove('a4-preview');
+    document.getElementById('printBtn').textContent = '打印预览';
+    window.scrollTo(0,0);
+  }
+  document.getElementById('printClose').addEventListener('click', closeAttView);
+  document.getElementById('printBtn').addEventListener('click', ()=>{
+    const btn = document.getElementById('printBtn');
+    if(document.body.classList.contains('a4-preview')){
+      window.print();
+    }else{
+      document.body.classList.add('a4-preview');
+      printMask.classList.add('show');
+      btn.textContent = '确认打印';
+      window.scrollTo(0,0);
+    }
+  });
+
+  let viewCur = null;
+  function buildAttendanceSheet(){
+    const y=viewCur.y, m=viewCur.m;
+    const totalDays = new Date(y,m,0).getDate();
+    const WEEK=["一","二","三","四","五","六","日"];
+    let totalHours=0, workDays=0, restDays=0, weekdayHours=0, weekendHours=0;
+    let dateCells='', weekCells='', hourCells='';
+    for(let d=1; d<=totalDays; d++){
+      const date = new Date(y, m-1, d);
+      const dow = (date.getDay()+6)%7; // 0=周一
+      const isWeekend = date.getDay()%6===0; // 周六或周日
+      dateCells += `<td${isWeekend?' class="sat"':''}>${d}</td>`;
+      weekCells += `<td${isWeekend?' class="sun"':''}>${WEEK[dow]}</td>`;
+      const v = getLog(y,m,d);
+      if(v===null) hourCells += '<td></td>';
+      else if(v>0){ hourCells += `<td class="work">${v}</td>`; totalHours += v; workDays++; if(dow<5) weekdayHours += v; else weekendHours += v; }
+      else { hourCells += '<td class="rest">休</td>'; restDays++; }
+    }
+    document.getElementById('printTitle').textContent = y + '年' + m + '月考勤';
+    const html = `<div class="a4-sheet">`
+      + `<h2>${y}年${m}月考勤</h2>`
+      + `<table class="att-table"><thead><tr>`
+      + `<th class="row-head">项目</th>${dateCells}<th class="sum-head">合计工时</th>`
+      + `</tr></thead><tbody>`
+      + `<tr><th class="row-head">星期</th>${weekCells}<td class="sum-head"></td></tr>`
+      + `<tr><th class="row-head">工时</th>${hourCells}<td class="sum-cell">${totalHours}</td></tr>`
+      + `</tbody></table>`
+      + `<div class="a4-sub">提示：工作日 ${weekdayHours} 小时　双休日 ${weekendHours} 小时</div>`
+      + `</div>`;
+    document.getElementById('printSheet').innerHTML = html;
+  }
+
+  document.getElementById('exportBtn').addEventListener('click', ()=>{
+    viewCur = { y:cur.y, m:cur.m };
+    buildAttendanceSheet();
+    printMask.classList.add('show');
+    document.body.classList.add('att-view');
+    window.scrollTo(0,0);
+  });
+  document.getElementById('prevMonthBtn').addEventListener('click', ()=>{
+    viewCur.m--; if(viewCur.m<1){ viewCur.m=12; viewCur.y--; }
+    buildAttendanceSheet();
+  });
+  document.getElementById('nextMonthBtn').addEventListener('click', ()=>{
+    viewCur.m++; if(viewCur.m>12){ viewCur.m=1; viewCur.y++; }
+    buildAttendanceSheet();
+  });
+})();
 function getWeekCn(y,m,d){
   const arr=["周日","周一","周二","周三","周四","周五","周六"];
   return arr[new Date(y,m-1,d).getDay()];
@@ -542,111 +1062,158 @@ function getWeekCn(y,m,d){
 function exportCurrentMonthXlsx(){
   const y=cur.y, m=cur.m;
   const totalDays = new Date(y,m,0).getDate();
-  let cnt=0, rest=0, totalHours=0;
-  for(let d=1;d<=totalDays;d++){
-    const v=getLog(y,m,d);
-    if(v!==null){ if(v>0){ cnt++; totalHours+=v; }else rest++; }
+  const dayCols = totalDays + 2;   // A表头列 + 日期列们 + 合计工时列
+  const lastCol = colIndexToColLetter(dayCols-1);
+  const sumColL = colIndexToColLetter(totalDays+1); // 合计列0-based = totalDays+1
+  let totalHours = 0;
+  for(let d=1; d<=totalDays; d++){ const v=getLog(y,m,d); if(v!==null && v>0) totalHours += v; }
+  // ---- 共享字符串（标题数字蓝色富文本，与工作簿.xlsx一致） ----
+  const siList = [];
+  function addSi(xml){ siList.push(xml); return siList.length-1; }
+  const siMonth = addSi('<si><t>月份</t></si>');
+  const siDate  = addSi('<si><t>日期</t></si>');
+  const siWeek  = addSi('<si><t>星期</t></si>');
+  const siHour  = addSi('<si><t>工时</t></si>');
+  const siSum   = addSi('<si><t>合计工时</t></si>');
+  const titleSi = addSi(
+    '<si><r><rPr><sz val="11"/><color rgb="FF1677FF"/><rFont val="宋体"/><charset val="134"/></rPr><t>本月一共 </t></r>'
+    + '<r><rPr><sz val="11"/><color rgb="FF1677FF"/><rFont val="Arial"/><charset val="134"/></rPr><t>'+totalDays+'</t></r>'
+    + '<r><rPr><sz val="11"/><color rgb="FF1677FF"/><rFont val="宋体"/><charset val="134"/></rPr><t xml:space="preserve"> 天</t></r></si>'
+  );
+  const weekSiCache = {};
+  function weekSi(name){
+    if(!(name in weekSiCache)) weekSiCache[name] = addSi('<si><t>'+escapeXml(name)+'</t></si>');
+    return weekSiCache[name];
   }
-  const monthZh = MONTHS[m-1];
-  const titleText = `${monthZh}・共 ${totalDays} 天\n工作 ${cnt} 天・休息 ${rest} 天・合计 ${totalHours} 小时`;
-  const sharedStrings = [];
-  function ssIdx(s){
-    let i=sharedStrings.indexOf(s);
-    if(i===-1){ i=sharedStrings.length; sharedStrings.push(s); }
-    return i;
+  const xiuSi = addSi('<si><t>休</t></si>');
+  const colOf = i => colIndexToColLetter(i); // 0-based
+  // ---- 四行结构：月份+标题 / 日期 / 星期 / 工时+合计 ----
+  let row1 = '<c r="A1" s="2" t="s"><v>'+siMonth+'</v></c>'
+    + '<c r="B1" s="1" t="s"><v>'+titleSi+'</v></c>';
+  for(let i=2; i<dayCols; i++) row1 += '<c r="'+colOf(i)+'1" s="1"/>';
+  let row2 = '<c r="A2" s="2" t="s"><v>'+siDate+'</v></c>';
+  for(let d=1; d<=totalDays; d++) row2 += '<c r="'+colOf(d)+'2" s="2"><v>'+d+'</v></c>';
+  row2 += '<c r="'+sumColL+'2" s="2" t="s"><v>'+siSum+'</v></c>';
+  let row3 = '<c r="A3" s="3" t="s"><v>'+siWeek+'</v></c>';
+  for(let d=1; d<=totalDays; d++) row3 += '<c r="'+colOf(d)+'3" s="3" t="s"><v>'+weekSi(getWeekCn(y,m,d))+'</v></c>';
+  row3 += '<c r="'+sumColL+'3" s="3"/>';
+  let row4 = '<c r="A4" s="4" t="s"><v>'+siHour+'</v></c>';
+  for(let d=1; d<=totalDays; d++){
+    const v = getLog(y,m,d), L = colOf(d);
+    if(v===null)      row4 += '<c r="'+L+'4" s="4"/>';
+    else if(v>0)      row4 += '<c r="'+L+'4" s="5"><v>'+v+'</v></c>';
+    else              row4 += '<c r="'+L+'4" s="6" t="s"><v>'+xiuSi+'</v></c>';
   }
-  let sheetRows=[];
-  {
-    const row=[];
-    row.push({t:'s',v:ssIdx("月份")});
-    for(let c=1;c<=32;c++){
-      row.push({t:'s',v:ssIdx(titleText)});
-    }
-    sheetRows.push(row);
-  }
-  {
-    const row=[];
-    row.push({t:'s',v:ssIdx("日期")});
-    for(let d=1;d<=totalDays;d++) row.push({t:'n',v:d});
-    for(let pad=totalDays+1;pad<=31;pad++) row.push({t:'n',v:''});
-    row.push({t:'s',v:ssIdx("合计工时")});
-    sheetRows.push(row);
-  }
-  {
-    const row=[];
-    row.push({t:'s',v:ssIdx("星期")});
-    for(let d=1;d<=totalDays;d++) row.push({t:'s',v:ssIdx(getWeekCn(y,m,d))});
-    for(let pad=totalDays+1;pad<=31;pad++) row.push({t:'s',v:ssIdx("")});
-    row.push({t:'s',v:ssIdx("")});
-    sheetRows.push(row);
-  }
-  {
-    const row=[];
-    row.push({t:'s',v:ssIdx("工时")});
-    for(let d=1;d<=totalDays;d++){
-      const hv=getLog(y,m,d);
-      row.push({t:'n',v:(hv!==null&&hv>0)?hv:''});
-    }
-    for(let pad=totalDays+1;pad<=31;pad++) row.push({t:'n',v:''});
-    row.push({t:'n',v:totalHours});
-    sheetRows.push(row);
-  }
-  const workbookXml=`<?xml version="1.0" encoding="UTF-8"?>
-<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-  <sheets>
-    <sheet name="考勤" sheetId="1" r:id="rId1" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/>
-  </sheets>
-</workbook>`;
-  let sheetDataXml='';
-  for(let ri=0;ri<sheetRows.length;ri++){
-    const cells=sheetRows[ri];
-    let rowXml='';
-    for(let ci=0;ci<cells.length;ci++){
-      const c=cells[ci];
-      const colLetter = colIndexToColLetter(ci);
-      if(c.v==='' || c.v===null){
-        rowXml+=`<c r="${colLetter}${ri+1}" t="${c.t}"><v></v></c>`;
-      }else{
-        rowXml+=`<c r="${colLetter}${ri+1}" t="${c.t}"><v>${c.v}</v></c>`;
-      }
-    }
-    sheetDataXml+=`<row r="${ri+1}">${rowXml}</row>`;
-  }
-  const mergeXml="<mergeCells><mergeCell ref=\"B1:AG1\" /></mergeCells>";
-  const sheetXml=`<?xml version="1.0" encoding="UTF-8"?>
-<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-  <sheetData>${sheetDataXml}</sheetData>
-  ${mergeXml}
-</worksheet>`;
-  let ssXml='';
-  for(const s of sharedStrings){
-    ssXml+=`<si><t>${escapeXml(s)}</t></si>`;
-  }
-  const sharedStringXml=`<?xml version="1.0" encoding="UTF-8"?>
-<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="${sharedStrings.length}" uniqueCount="${sharedStrings.length}">${ssXml}</sst>`;
-  const relsWorkbook=`<?xml version="1.0" encoding="UTF-8"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
-<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>
-</Relationships>`;
-  const relsSheet=`<?xml version="1.0" encoding="UTF-8"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships" />`;
-  const contentTypes=`<?xml version="1.0" encoding="UTF-8"?>
-<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
-<Default Extension="xml" ContentType="application/xml" />
-<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml" />
-<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml" />
-<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml" />
-</Types>`;
-  const relsRoot=`<?xml version="1.0" encoding="UTF-8"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml" />
-</Relationships>`;
+  row4 += '<c r="'+sumColL+'4" s="7"><v>'+totalHours+'</v></c>';
+  const sheetDataXml =
+    '<row r="1" ht="26" customHeight="1" spans="1:'+dayCols+'">'+row1+'</row>'
+    + '<row r="2" ht="18" customHeight="1" spans="1:'+dayCols+'">'+row2+'</row>'
+    + '<row r="3" ht="16" customHeight="1" spans="1:'+dayCols+'">'+row3+'</row>'
+    + '<row r="4" spans="1:'+dayCols+'">'+row4+'</row>';
+  const sheetXml='<?xml version="1.0" encoding="UTF-8"?>\n'
+    +'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">\n'
+    +'  <dimension ref="A1:'+lastCol+'4"/>\n'
+    +'  <sheetViews><sheetView tabSelected="1" workbookViewId="0"><pane xSplit="1" ySplit="3" topLeftCell="B4" activePane="bottomRight" state="frozen"/></sheetView></sheetViews>\n'
+    +'  <sheetFormatPr defaultColWidth="9" defaultRowHeight="13.5"/>\n'
+    +'  <cols>'
+    +'<col min="1" max="1" width="8" customWidth="1"/>'
+    +'<col min="2" max="'+(totalDays+1)+'" width="5" customWidth="1"/>'
+    +'<col min="'+(totalDays+2)+'" max="'+(totalDays+2)+'" width="9" customWidth="1"/>'
+    +'</cols>\n'
+    +'  <sheetData>'+sheetDataXml+'</sheetData>\n'
+    +'  <mergeCells count="1"><mergeCell ref="B1:'+lastCol+'1"/></mergeCells>\n'
+    +'  <pageMargins left="0.75" right="0.75" top="1" bottom="1" header="0.5" footer="0.5"/>\n'
+    +'</worksheet>';
+  // ---- 样式：表头/日期行浅蓝底粗体、星期行红字、工时行按index风格绿(有)红(休)橙(空) ----
+  const stylesXml='<?xml version="1.0" encoding="UTF-8"?>\n'
+    +'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">\n'
+    +'  <fonts count="6">\n'
+    +'    <font><sz val="11"/><color theme="1"/><name val="宋体"/><charset val="134"/></font>\n'
+    +'    <font><sz val="11"/><color rgb="FF1677FF"/><name val="宋体"/><charset val="134"/></font>\n'
+    +'    <font><b/><sz val="11"/><name val="宋体"/><charset val="134"/></font>\n'
+    +'    <font><b/><sz val="11"/><color rgb="FFC00000"/><name val="宋体"/><charset val="134"/></font>\n'
+    +'    <font><b/><sz val="11"/><color rgb="FF52C41A"/><name val="宋体"/><charset val="134"/></font>\n'
+    +'    <font><b/><sz val="11"/><color rgb="FFF5222D"/><name val="宋体"/><charset val="134"/></font>\n'
+    +'  </fonts>\n'
+    +'  <fills count="6">\n'
+    +'    <fill><patternFill patternType="none"/></fill>\n'
+    +'    <fill><patternFill patternType="gray125"/></fill>\n'
+    +'    <fill><patternFill patternType="solid"><fgColor rgb="FFD9E1F2"/><bgColor indexed="64"/></patternFill></fill>\n'
+    +'    <fill><patternFill patternType="solid"><fgColor rgb="FFFCE4D6"/><bgColor indexed="64"/></patternFill></fill>\n'
+    +'    <fill><patternFill patternType="solid"><fgColor rgb="FFF6FFED"/><bgColor indexed="64"/></patternFill></fill>\n'
+    +'    <fill><patternFill patternType="solid"><fgColor rgb="FFFFF1F0"/><bgColor indexed="64"/></patternFill></fill>\n'
+    +'  </fills>\n'
+    +'  <borders count="2">\n'
+    +'    <border><left/><right/><top/><bottom/><diagonal/></border>\n'
+    +'    <border><left style="thin"><color rgb="FFBFBFBF"/></left><right style="thin"><color rgb="FFBFBFBF"/></right><top style="thin"><color rgb="FFBFBFBF"/></top><bottom style="thin"><color rgb="FFBFBFBF"/></bottom><diagonal/></border>\n'
+    +'  </borders>\n'
+    +'  <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>\n'
+    +'  <cellXfs count="8">\n'
+    +'    <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>\n'
+    +'    <xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>\n'
+    +'    <xf numFmtId="0" fontId="2" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>\n'
+    +'    <xf numFmtId="0" fontId="3" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>\n'
+    +'    <xf numFmtId="0" fontId="0" fillId="3" borderId="1" xfId="0" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>\n'
+    +'    <xf numFmtId="0" fontId="4" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>\n'
+    +'    <xf numFmtId="0" fontId="5" fillId="5" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>\n'
+    +'    <xf numFmtId="0" fontId="2" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>\n'
+    +'  </cellXfs>\n'
+    +'  <cellStyles count="1"><cellStyle name="常规" xfId="0" builtinId="0"/></cellStyles>\n'
+    +'</styleSheet>';
+  let ssXml = '';
+  for(const si of siList) ssXml += si;
+  const sharedStringXml='<?xml version="1.0" encoding="UTF-8"?>\n'
+    +'<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="'+siList.length+'" uniqueCount="'+siList.length+'">'+ssXml+'</sst>';
+  const workbookXml='<?xml version="1.0" encoding="UTF-8"?>\n'
+    +'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">\n'
+    +'  <bookViews>\n'
+    +'    <workbookView xWindow="0" yWindow="0" windowWidth="16384" windowHeight="8192"/>\n'
+    +'  </bookViews>\n'
+    +'  <sheets>\n'
+    +'    <sheet name="考勤表" sheetId="1" r:id="rId1" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/>\n'
+    +'  </sheets>\n'
+    +'</workbook>';
+  const coreProps='<?xml version="1.0" encoding="UTF-8"?>\n'
+    +'<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\n'
+    +'<dc:creator>考勤日历</dc:creator>\n'
+    +'<dcterms:created xsi:type="dcterms:W3CDTF">'+new Date().toISOString().slice(0,19)+'Z</dcterms:created>\n'
+    +'</cp:coreProperties>';
+  const appProps='<?xml version="1.0" encoding="UTF-8"?>\n'
+    +'<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVT">\n'
+    +'<Application>Microsoft Excel</Application>\n'
+    +'</Properties>';
+  const relsWorkbook='<?xml version="1.0" encoding="UTF-8"?>\n'
+    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">\n'
+    +'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>\n'
+    +'<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>\n'
+    +'</Relationships>';
+  const relsSheet='<?xml version="1.0" encoding="UTF-8"?>\n'
+    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships" />';
+  const contentTypes='<?xml version="1.0" encoding="UTF-8"?>\n'
+    +'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">\n'
+    +'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml" />\n'
+    +'<Default Extension="xml" ContentType="application/xml" />\n'
+    +'<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml" />\n'
+    +'<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml" />\n'
+    +'<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml" />\n'
+    +'<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml" />\n'
+    +'<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml" />\n'
+    +'<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml" />\n'
+    +'</Types>';
+  const relsRoot='<?xml version="1.0" encoding="UTF-8"?>\n'
+    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">\n'
+    +'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml" />\n'
+    +'<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml" />\n'
+    +'<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml" />\n'
+    +'</Relationships>';
   const files={
     '[Content_Types].xml':contentTypes,
     '_rels/.rels':relsRoot,
+    'docProps/core.xml':coreProps,
+    'docProps/app.xml':appProps,
     'xl/_rels/workbook.xml.rels':relsWorkbook,
     'xl/workbook.xml':workbookXml,
+    'xl/styles.xml':stylesXml,
     'xl/sharedStrings.xml':sharedStringXml,
     'xl/worksheets/_rels/sheet1.xml.rels':relsSheet,
     'xl/worksheets/sheet1.xml':sheetXml
@@ -701,4 +1268,4 @@ function loadScript(src){
 </script>
 </body>
 </html>
-<!-- （注：内容由AI生成） -->
+<!--pnid:yYlLBEgnAG2K3NoNJyEKWl--><!-- （注：内容由AI生成） -->
