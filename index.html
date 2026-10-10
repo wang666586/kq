@@ -41,12 +41,22 @@
     vertical-align: middle; color: #333; position: relative;
   }
   #calTable td.empty { background: transparent; }
-  #calTable th:nth-child(6), #calTable td:nth-child(6) { color: #fa8c16; }
+  #calTable th:nth-child(1), #calTable td:nth-child(1) { color: #fa8c16; }
   #calTable th:nth-child(7), #calTable td:nth-child(7) { color: #fa8c16; }
-  #calTable td.weekend { background: #fff7e6; }
-  #calTable td.logged-work { background:#f6ffed; }
-  #calTable td.logged-rest { background:#fff1f0; }
-  #calTable td.today { outline: 2px solid #1677ff; outline-offset: -2px; }
+  /* 有实际加班的日期：浅绿填充 */
+  #calTable td.has-ot { background:#e8ffd9; }
+  /* 标「正」的日期：绿色填充（工时多少都填） */
+  #calTable td.has-norm-green { background:#e8ffd9; }
+  /* 休息(0小时)：浅红填充 */
+  #calTable td.has-rest { background:#ffeded; }
+  /* 星期六日（非节假日/正常）：浅紫填充 */
+  #calTable td.has-weekend { background:#f4f0ff; }
+  /* 周末单元格不再铺背景色，表头「六/日」文字颜色保留 */
+  /* 已记录日期：去掉工作/休息背景色，仅保留方框描边 */
+  #calTable td.today { outline: 2px solid #a8d0ff; outline-offset: -2px; }
+  #calTable td { position: relative; }
+  #calTable td.holiday { background:#fff2e0; }
+  #calTable td.holiday.today { background:#fff2e0; }
   .summary { width:100%; padding:10px 14px 14px; margin-top:4px; text-align:center; font-size:14px; line-height:1.7; border-top:1px dashed #f0f0f0; }
   .num-red { color:#f5222d; font-weight:bold; font-size:16px; }
   .bark-wrap { width:100%; max-width:440px; background:#fff; border-radius:14px; box-shadow:0 2px 10px rgba(0,0,0,.05); padding:12px 18px; margin-top:12px; }
@@ -82,7 +92,7 @@
   .m-del { display:block; width:100%; margin-top:12px; background:none; border:none; color:#bbb; font-size:12px; cursor:pointer; }
   .m-title{font-size:16px;font-weight:bold;text-align:center;margin-bottom:16px;}
   .m-normal-input { width:100%; padding:12px; font-size:14px; border:1px solid #d9d9d9; border-radius:10px; outline:none; box-sizing:border-box; }
-  td.logged { box-shadow: inset 0 0 0 1.5px #91caff; }
+  /* 已记录日期不再有方框，仅「选中」时显示描边样式 */
   td .wh { position:absolute; top:3px; right:5px; font-size:10px; font-weight:700; line-height:1; }
   td .wh.wh-work { color:#52c41a; }
   td .wh.wh-rest { color:#f5222d; }
@@ -90,10 +100,23 @@
   .num-green { color:#52c41a; font-weight:bold; font-size:16px; }
   .num-blue { color:#1677ff; font-weight:bold; font-size:16px; }
   .num-purple { color:#722ed1; font-weight:bold; font-size:16px; }
-  .legend-row { display:flex; justify-content:center; align-items:center; gap:18px; margin-bottom:10px; }
-  .legend-item { display:flex; align-items:center; gap:6px; }
-  .legend-bar { width:40px; height:4px; border-radius:2px; }
-  .legend-txt { font-size:12px; color:#666; }
+  .stat-line { text-align:center; font-size:13px; color:#555; margin-bottom:10px; }
+  .stat-line2 { font-size:12px; color:#666; margin-bottom:4px; line-height:1.5; }
+  .stat-legend { text-align:center; font-size:11px; color:#8c8c8c; margin-top:6px; }
+  .stat-legend-one { display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:8px 16px; font-size:11px; color:#8c8c8c; margin-top:8px; }
+  .legend-cell { display:inline-flex; align-items:center; white-space:nowrap; }
+  .stat-sq { display:inline-block; width:10px; height:10px; border-radius:2px; background:#e8ffd9; border:1px solid #b7eb8f; margin-right:4px; vertical-align:middle; }
+  .stat-sq-org { display:inline-block; width:10px; height:10px; border-radius:2px; background:#fff2e0; border:1px solid #fa8c16; margin-right:4px; vertical-align:middle; }
+  .stat-sq-red { display:inline-block; width:10px; height:10px; border-radius:2px; background:#ffeded; border:1px solid #ffa39e; margin-right:4px; vertical-align:middle; }
+  .stat-sq-pur { display:inline-block; width:10px; height:10px; border-radius:2px; background:#f4f0ff; border:1px solid #d3adf7; margin-right:4px; vertical-align:middle; }
+  body.dark .stat-line { color:#9aa7b8; }
+  body.dark .stat-line2 { color:#8b98ab; }
+  body.dark .stat-legend { color:#6b788c; }
+  body.dark .stat-legend-one { color:#6b788c; }
+  body.dark .stat-sq { background:#173a17; border-color:#2f6b2f; }
+  body.dark .stat-sq-org { background:#3a2a12; border-color:#d46b08; }
+  body.dark .stat-sq-red { background:#3a1a1c; border-color:#a3373c; }
+  body.dark .stat-sq-pur { background:#241f3d; border-color:#6b4fa0; }
   .seg-green { background:#52c41a; }
   .seg-red { background:#f5222d; }
   /* 查看当月考勤：A4 横向打印表 */
@@ -109,7 +132,8 @@
   .print-sheet { overflow:auto; padding:0; background:#fff; flex:1; display:flex; flex-direction:column; }
   .a4-sheet { background:#fff; width:max-content; min-width:100%; margin:auto 0; padding:0; box-sizing:border-box; display:flex; flex-direction:column; justify-content:center; flex:1 0 auto; }
   .a4-sheet h2 { text-align:center; margin:0; font-size:18px; color:#262626; background:#ffe58f; border:1px solid #bfbfbf; border-bottom:none; padding:8px 0; }
-  .a4-sheet .a4-sub { text-align:left; color:#1677ff; font-weight:700; font-size:12px; margin:0; border:1px solid #bfbfbf; border-top:none; padding:8px 10px; }
+  /* 表格下方的说明小字（不放进表格里） */
+  .a4-foot-note { text-align:left; color:#595959; font-weight:400; font-size:11px; line-height:1.7; margin:0; padding:8px 2px 0; }
   .month-nav { display:flex; flex-wrap:nowrap; gap:6px; padding:10px 0 0; justify-content:flex-start; }
   .month-nav button { padding:8px 8px; border:none; border-radius:0; background:#1677ff; color:#fff; font-size:12px; cursor:pointer; flex:1 1 0; min-width:0; white-space:nowrap; }
   .month-nav button:active { background:#0e5fd8; }
@@ -121,16 +145,56 @@
   .att-table { width:100%; min-width:1000px; font-size:12px; table-layout:auto; }
   .att-table th, .att-table td { border:1px solid #bfbfbf; text-align:center; height:34px; line-height:1.2; overflow:hidden; }
   .att-table .row-head { background:#e6f0ff; font-weight:700; width:46px; }
-  .att-table .sat { background:#fff1f0; color:#fa8c16; }
-  .att-table .sun { background:#fff1f0; color:#fa8c16; }
+  /* ===== 表格填充色与日历保持一致 ===== */
+  .att-table .sat { color:#fa8c16; }
+  .att-table .sun { color:#fa8c16; }
   .att-table td { background:#fafafa; }
   .att-table .row-head, .att-table th.row-head { background:#e6f0ff; }
-  .att-table td.sat { background:#fff1f0; }
-  .att-table td.sun { background:#fff1f0; }
-  .att-table td.work { background:#f6ffed; color:#52c41a; font-weight:700; }
-  .att-table td.rest { background:#fff1f0; color:#f5222d; font-weight:700; }
+  .att-table td.sat { background:transparent; }
+  .att-table td.sun { background:transparent; }
+  .att-table td.work { color:#52c41a; font-weight:700; }
+  .att-table td.rest { color:#f5222d; font-weight:700; }
+  /* 日历同款填充：加班/正常 = 浅绿，休息 = 浅红，双休日 = 浅紫，节假日 = 浅橙 */
+  .att-table td.has-ot, .att-table td.has-norm-green { background:#e8ffd9; }
+  .att-table td.has-rest { background:#ffeded; }
+  .att-table td.has-weekend { background:#f4f0ff; }
+  .att-table td.holiday-cell { background:#fff2e0; }
+  .att-table td.has-ot .holi-tag, .att-table td.has-norm-green .holi-tag { background:#fa8c16; }
   .att-table .sum-head, .att-table td.sum-head { background:#ffe58f; font-weight:700; }
-  .att-table .sum-cell, .att-table td.sum-cell { background:#ffe58f; font-weight:700; color:#1677ff; }
+  .att-table .sum-cell, .att-table td.sum-cell { background:#ffe58f; font-weight:700; color:#1677ff; vertical-align:middle; }
+  /* 节假日：日期数字左上角「假」角标 */
+  .att-table td { position:relative; }
+  .att-table .holi-tag {
+    position:absolute; top:0; left:0; font-size:9px; line-height:1; padding:1px 2px;
+    background:#fa8c16; color:#fff; border-radius:0 0 5px 0; font-weight:700; pointer-events:none;
+  }
+  .att-table td.holiday-cell { color:#d46b08; }
+  .att-table td.holi-hour { color:#fa8c16; font-weight:700; }
+  .att-table .norm-tag {
+    position:absolute; top:0; left:0; font-size:9px; line-height:1; padding:1px 2px;
+    background:#1677ff; color:#fff; border-radius:0 0 5px 0; font-weight:700; pointer-events:none;
+  }
+  .att-table td.normal-cell { color:#0958d9; }
+  .cal-week-cell td { position:relative; }
+  .cal-holi-tag {
+    position:absolute; top:2px; left:3px; z-index:3; font-size:9px; line-height:1; padding:1px 3px;
+    background:#fa8c16; color:#fff; border-radius:4px 4px 4px 0; font-weight:700; pointer-events:none;
+    box-shadow:0 1px 3px rgba(250,140,22,.5);
+  }
+  body.dark .cal-holi-tag { background:#d46b08; color:#fff; }
+  .cal-norm-tag {
+    position:absolute; top:2px; left:3px; z-index:3; font-size:9px; line-height:1; padding:1px 3px;
+    background:#1677ff; color:#fff; border-radius:4px 4px 4px 0; font-weight:700; pointer-events:none;
+    box-shadow:0 1px 3px rgba(22,119,255,.5);
+  }
+  body.dark .cal-norm-tag { background:#0958d9; color:#fff; }
+  /* 右上角「xx小时」按工时着色（0=红 8=绿 10=蓝 11=紫，内联样式控制） */
+  #calTable td.normal-mark { background:#e8ffd9; }
+  body.dark #calTable td.normal-mark { background:#173a17; }
+  /* 批量操作栏：节日按钮 */
+  #batchHoliday.on { background:#fa8c16; color:#fff; border-color:#fa8c16; }
+  #batchNormal.on { background:#1677ff; color:#fff; border-color:#1677ff; }
+  .leg-holi { display:inline-block; width:10px; height:10px; border-radius:3px; background:#fa8c16; margin-right:3px; vertical-align:middle; }
   /* ============ 登录认证门禁（渐变描边毛玻璃） ============ */
   .auth-gate { position:fixed; inset:0; z-index:9999; background:linear-gradient(150deg,#eef4ff 0%,#f7fbff 45%,#fff5f2 100%); display:flex; align-items:center; justify-content:center; padding:18px; }
   .auth-gate.hide { display:none; }
@@ -169,9 +233,13 @@
   body.dark .nav-btn:disabled { background:#202632; color:#4a5666; }
   body.dark #calTable th { color:#7d8a9c; }
   body.dark #calTable td { color:#cbd5e3; }
-  body.dark #calTable td.weekend { background:#2a2418; }
-  body.dark #calTable td.logged-work { background:#16281a; }
-  body.dark #calTable td.logged-rest { background:#2b1a1c; }
+  /* 深色模式周末单元格同样不铺背景色 */
+  body.dark #calTable td.has-ot { background:#173a17; }
+  body.dark #calTable td.has-norm-green { background:#173a17; }
+  body.dark #calTable td.has-rest { background:#3a1a1c; }
+  body.dark #calTable td.has-weekend { background:#241f3d; }
+  /* 深色模式同样去掉工作/休息背景色 */
+  body.dark #calTable td.holiday { background:#33260f; }
   body.dark .summary { border-top-color:#2a3040; }
   body.dark .bark-wrap { background:#1b2029; box-shadow:0 2px 10px rgba(0,0,0,.4); }
   body.dark .bark-tip { color:#8b98aa; }
@@ -208,11 +276,13 @@
   body.dark .m-cancel { background:#242c38; color:#cbd5e3; }
   body.dark .m-del { color:#6b788c; }
   body.dark .m-title { color:#e8eefb; }
-  body.dark td.logged { box-shadow: inset 0 0 0 1.5px #2f5f9e; }
   body.dark .legend-txt { color:#9aa7b8; }
   body.dark .print-panel { background:#1b2029; }
   body.dark .print-mask.show { background:transparent; }
-  body.dark .a4-sheet .a4-sub { color:#5ca8ff !important; border-color:#333c4c !important; }
+  body.dark .a4-sheet .a4-foot-note { color:#9aa7b8 !important; }
+  body.dark .att-table td.holiday-cell { background:#33260f; color:#ffa940; }
+  body.dark .att-table td.holi-hour { background:#33260f; color:#ffa940; }
+  body.dark .att-table td.normal-cell { background:#12233f; color:#5ca8ff; }
   body.dark .att-table th, body.dark .att-table td { border-color:#333c4c; }
   body.dark .att-table td { background:#1b2029; color:#cbd5e3; }
   body.dark .att-table .row-head, body.dark .att-table th.row-head { background:#243044; color:#cbd5e3; }
@@ -224,34 +294,71 @@
   body.dark .a4-sheet h2 { background:#4a3f14; border-color:#333c4c; border-bottom:none; color:#ffd666; }
   @media print { body.dark { background:#fff !important; } body.dark .a4-sheet, body.dark .att-table td { background:#fff !important; color:#000 !important; } }
   /* ============ 批量连选 & 一次性设置工时 ============ */
-  /* 选中态：浅黄底 + 深棕字 + 金色内描边，柔和醒目 */
-  #calTable td.sel { background:#ffe58f !important; color:#614700 !important; box-shadow: inset 0 0 0 2px #d48806; }
-  #calTable td.sel .wh { color:#614700; }
-  #calTable td.today.sel { outline-color:#d48806; }
-  body.dark #calTable td.sel { background:#ffe58f !important; box-shadow: inset 0 0 0 2px #b37b00; }
-  .batch-bar { display:none; width:100%; padding:10px 14px 12px; border-top:1px dashed #f0f0f0; }
-  .batch-bar.show { display:block; }
-  .batch-row1 { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
-  .batch-info { font-size:13px; color:#555; text-align:left; }
-  .batch-info b { color:#1677ff; font-size:15px; }
-  .batch-clear { border:none; background:none; color:#f5222d; font-size:12px; cursor:pointer; padding:4px 6px; }
+  /* 选中态：今日方框同色系加深填充（浅蓝底 + 深蓝描边） */
+  #calTable td.sel { background:#a8d0ff !important; color:#0b3a8c !important; box-shadow: inset 0 0 0 2px #0958d9; }
+  #calTable td.sel .wh { color:#0b3a8c; }
+  #calTable td.today.sel { outline-color:#0958d9; }
+  body.dark #calTable td.sel { background:#1c3a63 !important; color:#cfe4ff !important; box-shadow: inset 0 0 0 2px #4096ff; }
+  .batch-bar { display:none; position:fixed; left:50%; bottom:18px; transform:translateX(-50%); width:calc(100% - 40px); max-width:560px; z-index:80; background:#fff; border-radius:20px; box-shadow:0 24px 60px rgba(15,23,42,.3); padding:0; box-sizing:border-box; overflow:hidden; border:1px solid #e8ecf3; }
+  .batch-bar.show { display:block; animation:batchPop .24s cubic-bezier(.34,1.4,.64,1); }
+  @keyframes batchPop { from { opacity:0; transform:translateX(-50%) translateY(24px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+  .batch-close { position:absolute; top:10px; right:12px; border:none; background:#f0f2f5; color:#8c8c8c; width:26px; height:26px; border-radius:50%; font-size:15px; line-height:1; cursor:pointer; padding:0; transition:background .15s; }
+  .batch-close:hover { background:#e4e8ee; color:#595959; }
+  .batch-info { padding:16px 18px 0; font-size:14px; color:#555; text-align:left; }
+  .batch-info b { color:#1677ff; font-size:18px; font-weight:700; }
+  .batch-quick { display:flex; gap:10px; padding:12px 18px 4px; min-width:0; }
+  .batch-quick button { flex:1; padding:14px 0; border:1.5px solid transparent; background:#f7f9fc; border-radius:12px; font-size:16px; font-weight:600; cursor:pointer; transition:all .15s; }
+  .batch-quick button[data-h="0"]  { color:#f5222d; background:#fff1f0; border-color:#ffa39e; }
+  .batch-quick button[data-h="8"]  { color:#52c41a; background:#f6ffed; border-color:#b7eb8f; }
+  .batch-quick button[data-h="10"] { color:#0e8c8c; background:#e6fffb; border-color:#87e8de; }
+  .batch-quick button[data-h="11"] { color:#722ed1; background:#f9f0ff; border-color:#d3adf7; }
+  .batch-quick button:hover { filter:brightness(.96); }
+  .batch-quick button[data-h="0"].active  { background:#f5222d; color:#fff; border-color:#f5222d; box-shadow:0 4px 12px rgba(245,34,45,.35); }
+  .batch-quick button[data-h="8"].active  { background:#52c41a; color:#fff; border-color:#52c41a; box-shadow:0 4px 12px rgba(82,196,26,.35); }
+  .batch-quick button[data-h="10"].active { background:#13c2c2; color:#fff; border-color:#13c2c2; box-shadow:0 4px 12px rgba(19,194,194,.35); }
+  .batch-quick button[data-h="11"].active { background:#722ed1; color:#fff; border-color:#722ed1; box-shadow:0 4px 12px rgba(114,46,209,.35); }
+  #batchInput { flex:1.2; min-width:0; padding:14px 6px; font-size:16px; font-weight:600; border:1px solid #e2e6ee; background:#f7f9fc; border-radius:12px; text-align:center; outline:none; box-sizing:border-box; color:#43506b; transition:border-color .15s; }
+  #batchInput:focus { border-color:#1677ff; background:#fff; }
+  #batchInput::placeholder { color:#b6bfce; font-weight:400; font-size:13px; }
+  .batch-row3 { display:flex; gap:10px; padding:12px 18px 0; }
+  .batch-foot { display:flex; gap:10px; padding:10px 18px 16px; justify-content:flex-end; align-items:center; }
+  #batchSaveBtn { flex:none; padding:12px 28px; border:none; background:linear-gradient(135deg,#1677ff,#4096ff); color:#fff; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; transition:all .15s; box-shadow:0 4px 12px rgba(22,119,255,.35); }
+  #batchSaveBtn:hover { filter:brightness(1.08); }
+  #batchSaveBtn:disabled { opacity:.5; }
+  .batch-clear { flex:none; padding:12px 20px; border:1.5px solid #ffa39e; background:#fff1f0; color:#cf1322; font-size:14px; font-weight:600; cursor:pointer; border-radius:12px; transition:all .15s; }
+  .batch-clear:hover { background:#ffccc7; }
   .batch-clear:disabled { opacity:.5; }
-  .batch-row2 { display:flex; gap:8px; align-items:center; }
-  .batch-quick { flex:1; display:flex; gap:6px; min-width:0; }
-  .batch-quick button { flex:1; padding:9px 0; border:1px solid #d9d9d9; background:#fff; border-radius:9px; font-size:13px; color:#555; cursor:pointer; }
-  .batch-quick button.active { background:#1677ff; color:#fff; border-color:#1677ff; font-weight:600; }
-  #batchInput { width:62px; flex:none; padding:9px 4px; font-size:16px; border:1px solid #d9d9d9; border-radius:9px; text-align:center; outline:none; box-sizing:border-box; }
-  #batchInput:focus { border-color:#1677ff; }
-  #batchSave { flex:none; padding:10px 16px; border:none; border-radius:9px; background:#1677ff; color:#fff; font-size:14px; cursor:pointer; white-space:nowrap; }
-  #batchSave:disabled { opacity:.5; }
-  .batch-msg { min-height:16px; margin-top:6px; font-size:12px; text-align:center; }
+  #batchHoliday { flex:1; padding:12px 0; border:1.5px solid #ffd591; background:#fff7e6; border-radius:12px; font-size:14px; font-weight:600; color:#d46b08; cursor:pointer; white-space:nowrap; transition:all .15s; }
+  #batchHoliday:hover { background:#ffe7ba; }
+  #batchHoliday.on { background:#d46b08; border-color:#d46b08; color:#fff; box-shadow:0 4px 12px rgba(212,107,8,.35); }
+  #batchNormal { flex:1; padding:12px 0; border:1.5px solid #91caff; background:#e6f4ff; border-radius:12px; font-size:14px; font-weight:600; color:#0958d9; cursor:pointer; white-space:nowrap; transition:all .15s; }
+  #batchNormal:disabled { opacity:.5; }
+  #batchNormal:hover { background:#bae0ff; }
+  #batchNormal.on { background:#0958d9; border-color:#0958d9; color:#fff; box-shadow:0 4px 12px rgba(9,88,217,.35); }
+  .batch-msg { min-height:16px; margin-top:0; padding:0 18px 10px; font-size:13px; text-align:center; }
   .batch-msg.ok { color:#52c41a; }
   .batch-msg.err { color:#f5222d; }
-  body.dark .batch-bar { border-top-color:#2a3040; }
+  body.dark .batch-bar { background:#1b2029; box-shadow:0 24px 60px rgba(0,0,0,.65); }
   body.dark .batch-info { color:#9aa7b8; }
   body.dark .batch-quick button { background:#242c38; border-color:#333c4c; color:#cbd5e3; }
-  body.dark .batch-quick button.active { background:#1677ff; color:#fff; border-color:#1677ff; }
+  body.dark .batch-quick button[data-h="0"]  { background:rgba(245,34,45,.12); border-color:#8c1f26; color:#ff7875; }
+  body.dark .batch-quick button[data-h="8"]  { background:rgba(82,196,26,.12); border-color:#3d6c17; color:#95de64; }
+  body.dark .batch-quick button[data-h="10"] { background:rgba(19,194,194,.12); border-color:#0e7c7c; color:#5cdbd3; }
+  body.dark .batch-quick button[data-h="11"] { background:rgba(114,46,209,.12); border-color:#471d78; color:#b37feb; }
+  body.dark .batch-quick button[data-h="0"].active  { background:#f5222d; color:#fff; border-color:#f5222d; }
+  body.dark .batch-quick button[data-h="8"].active  { background:#52c41a; color:#fff; border-color:#52c41a; }
+  body.dark .batch-quick button[data-h="10"].active { background:#13c2c2; color:#fff; border-color:#13c2c2; }
+  body.dark .batch-quick button[data-h="11"].active { background:#722ed1; color:#fff; border-color:#722ed1; }
   body.dark #batchInput { background:#12161e; border-color:#333c4c; color:#e8eefb; }
+  body.dark #batchHoliday { background:rgba(212,107,8,.12); border-color:#874d00; color:#ffa940; }
+  body.dark #batchHoliday:hover { background:rgba(212,107,8,.25); }
+  body.dark #batchHoliday.on { background:#d46b08; border-color:#d46b08; color:#fff; }
+  body.dark #batchNormal { background:rgba(22,119,255,.12); border-color:#104c91; color:#69b1ff; }
+  body.dark #batchNormal:hover { background:rgba(22,119,255,.25); }
+  body.dark #batchNormal.on { background:#0958d9; border-color:#0958d9; color:#fff; }
+  body.dark .batch-clear { background:rgba(207,19,34,.18); border-color:#8c1f26; color:#ff7875; }
+  body.dark .batch-clear:hover { background:rgba(207,19,34,.3); }
+  body.dark #batchSaveBtn { background:linear-gradient(135deg,#0958d9,#1677ff); }
   @media (max-width: 600px) {
     .month-nav { gap:4px; padding:8px 0 0; }
     .month-nav button { padding:8px 4px; font-size:11px; }
@@ -325,19 +432,23 @@
       </div>
     </div>
     <div class="batch-bar" id="batchBar">
-      <div class="batch-row1">
-        <div class="batch-info">已选 <b id="batchCount">0</b> 天<span id="batchRange"></span></div>
-        <button class="batch-clear" id="batchDel" type="button">清除记录</button>
+      <div class="batch-info">已选 <b id="batchCount">0</b> 天<span id="batchRange"></span>
+        <button class="batch-close" id="batchClose" type="button" title="关闭">×</button>
       </div>
-      <div class="batch-row2">
-        <div class="batch-quick" id="batchQuick">
-          <button data-h="0" type="button">0</button>
-          <button data-h="8" type="button">8</button>
-          <button data-h="10" type="button">10</button>
-          <button data-h="11" type="button">11</button>
-        </div>
-        <input id="batchInput" inputmode="decimal" placeholder="小时" type="text">
-        <button id="batchSave" type="button">保存</button>
+      <div class="batch-quick" id="batchQuick">
+        <button data-h="0" type="button">0</button>
+        <button data-h="8" type="button">8</button>
+        <button data-h="10" type="button">10</button>
+        <button data-h="11" type="button">11</button>
+        <input id="batchInput" inputmode="decimal" placeholder="自定义" type="text">
+      </div>
+      <div class="batch-row3">
+        <button id="batchHoliday" type="button" title="把选中日期设为节假日（按节假日计算）">节假日</button>
+        <button id="batchNormal" type="button" title="标记为正常工作日：强制按星期一到星期五算法（超8计加班）">正常工作日</button>
+      </div>
+      <div class="batch-foot">
+        <button class="batch-clear" id="batchDel" type="button">清除</button>
+        <button id="batchSaveBtn" type="button">保存</button>
       </div>
       <div class="batch-msg" id="batchMsg"></div>
     </div>
@@ -414,6 +525,8 @@ const WORKER_API_BASE = "https://kq1.wanghai.qzz.io";
 // 内存缓存：全部数据来自云端KV
 let cachedBarkUrl = "";
 let memoryWorklog = {};
+let memoryHolidays = {};   // 节假日集合：{ "2026-10-1": true }
+let memoryNormals = {};    // 正常标记集合：{ "2026-10-1": true }（强制按周一~五算法）
 
 // -------- Worker API 封装 --------
 async function loadAllCloudData() {
@@ -422,7 +535,13 @@ async function loadAllCloudData() {
     const json = await res.json();
     if(json.ok){
       cachedBarkUrl = json.bark_url ?? "";
-      memoryWorklog = json.worklog ?? {};
+      const wl = json.worklog ?? {};
+      // 节假日/正常标记挂在 worklog 的保留键 "_holidays"/"_normals" 下（Worker 原样存储整个对象）
+      memoryHolidays = (wl._holidays && typeof wl._holidays === 'object') ? wl._holidays : {};
+      delete wl._holidays;
+      memoryNormals = (wl._normals && typeof wl._normals === 'object') ? wl._normals : {};
+      delete wl._normals;
+      memoryWorklog = wl;
       return true;
     }
   } catch (err) {
@@ -445,14 +564,34 @@ async function saveBarkCloud(text) {
 
 async function saveWholeWorklogCloud() {
   try {
+    // 每次保存都顺带携带节假日/正常标记（保留键 "_holidays"/"_normals"），避免互相覆盖丢失
+    const payload = Object.assign({}, memoryWorklog);
+    if(Object.keys(memoryHolidays).length){ payload._holidays = memoryHolidays; }
+    if(Object.keys(memoryNormals).length){ payload._normals = memoryNormals; }
     const res = await fetch(`${WORKER_API_BASE}/save_worklog`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ worklog: memoryWorklog })
+      body: JSON.stringify({ worklog: payload })
     });
     const j = await res.json();
     return j.ok === true;
   } catch(e){ return false; }
+}
+
+// 节假日持久化：挂在 worklog 的保留键 "_holidays" 下，随 save_worklog 存云端
+// （已验证 Worker 会原样存储整个 worklog 对象，"_holidays" 键不影响工时数据；
+//   若服务器将来提供独立的 /save_holidays 接口，优先走该接口）
+async function saveHolidaysCloud() {
+  try {
+    const res = await fetch(`${WORKER_API_BASE}/save_holidays`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ holidays: memoryHolidays })
+    });
+    const j = await res.json();
+    if(j && j.ok === true) return true;
+  } catch(e){}
+  return await saveWholeWorklogCloud();
 }
 
 // -------- 日历核心，标准半角减号 --------
@@ -462,6 +601,18 @@ function getLog(y,m,d){
   const k = key(y,m,d);
   const v = memoryWorklog[k];
   return (v===undefined || v===null) ? null : Number(v);
+}
+
+// -------- 正常标记：强制按「星期一到星期五」算法（超8计加班） --------
+function isNormalMark(y,m,d){
+  const k = holidayKey(y,m,d);
+  return memoryNormals[k] === true || memoryNormals[k] === 1 || memoryNormals[k] === "1";
+}
+// 互斥：设为正常时清除同日节假日标记，反之亦然
+function markNormal(y,m,d,on){
+  const k = holidayKey(y,m,d);
+  if(on){ memoryNormals[k] = true; delete memoryHolidays[k]; }
+  else { delete memoryNormals[k]; }
 }
 
 async function setLog(y,m,d,v){
@@ -474,9 +625,21 @@ async function setLog(y,m,d,v){
   await saveWholeWorklogCloud();
 }
 
+// -------- 节假日：日历「假」标记 --------
+function holidayKey(y,m,d){ return y+"-"+m+"-"+d; }
+function isHoliday(y,m,d){
+  const k = holidayKey(y,m,d);
+  return memoryHolidays[k] === true || memoryHolidays[k] === 1 || memoryHolidays[k] === "1";
+}
+async function setHoliday(y,m,d,on){
+  const k = holidayKey(y,m,d);
+  if(on){ memoryHolidays[k] = true; } else { delete memoryHolidays[k]; }
+  await saveHolidaysCloud();
+}
+
 const _now = new Date();
 const TODAY = { y:_now.getFullYear(), m:_now.getMonth()+1, d:_now.getDate() };
-const WEEK = ["一","二","三","四","五","六","日"];
+const WEEK = ["日","一","二","三","四","五","六"];
 const MONTHS = ["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"];
 function monthStats(y,m){
   const days = new Date(y,m,0).getDate();
@@ -484,26 +647,47 @@ function monthStats(y,m){
   for(let d=1;d<=days;d++){ const v=getLog(y,m,d); if(v!==null){ if(v>0){ cnt++; total+=v; } else { rest++; } } }
   return {days,cnt,rest,total};
 }
-function renderPanel(el, y, m){
-  const firstDow = new Date(y, m-1, 1).getDay();
-  const firstDay = (firstDow + 6) % 7;
+// 工时对应颜色：0=红 8=绿 10=蓝 11=紫，其余灰色
+function hoursColor(v){
+  if(v===0) return '#f5222d';
+  if(v===8) return '#52c41a';
+  if(v===10) return '#13c2c2';
+  if(v===11) return '#722ed1';
+  return '#8c8c8c';
+}
+function renderPanel(el, y, m){  const firstDow = new Date(y, m-1, 1).getDay();
+  const firstDay = firstDow;
   const days = new Date(y, m, 0).getDate();
   let html = '<table id="calTable"><thead><tr>' + WEEK.map(w=>`<th>${w}</th>`).join('') + '</tr></thead><tbody>';
   let cells = [];
   for(let i=0;i<firstDay;i++) cells.push('<td class="empty"></td>');
   for(let d=1; d<=days; d++){
     let cls = '';
+    const isHoli = isHoliday(y,m,d);
+    const isNorm = !isHoli && isNormalMark(y,m,d);
     if(new Date(y,m-1,d).getDay()%6===0) cls = 'weekend';
+    if(isHoli) cls += ' holiday';
+    if(isNorm) cls += ' normal-mark';
     if(y===TODAY.y && m===TODAY.m && d===TODAY.d) cls += ' today';
     if(selectedTs.has(dayStart(new Date(y,m-1,d)))) cls += ' sel';
     const logged = getLog(y,m,d);
     if(logged!==null) cls += ' logged ' + (logged>0 ? 'logged-work' : 'logged-rest');
-    let inner = String(d);
+    // 有实际加班（工作日/正常标记日 工时>8）的日期：填充浅绿色
+    if(!isHoli && logged!==null && logged>8 && ((new Date(y,m-1,d).getDay()+6)%7 < 5 || isNorm)) cls += ' has-ot';
+    // 标「正」的日子：填充绿色（无论工时多少）
+    if(isNorm) cls += ' has-norm-green';
+    // 休息（0小时）：填充浅红色
+    if(logged!==null && logged===0) cls += ' has-rest';
+    // 星期六日（排除节假日、正常标记）：填充浅紫色（需已标注工时或已标「休」）
+    if(new Date(y,m-1,d).getDay()%6===0 && !isHoli && !isNorm && logged!==null) cls += ' has-weekend';
+    let inner = isHoli ? '<span class="cal-holi-tag">假</span>' : (isNorm ? '<span class="cal-norm-tag">正</span>' : '');
+    inner += String(d);
     if(logged!==null){
-      inner += `<span class="wh ${logged>0?'wh-work':'wh-rest'}">${logged===0?'休':logged+'h'}</span>`;
-      // 色柱样式统一：所有柱固定同宽(70%)，仅颜色区分绿/红
+      // 右上角「xx小时」字样按工时着色：0=红 8=绿 10=蓝 11=紫，其余灰
+      inner += `<span class="wh ${logged>0?'wh-work':'wh-rest'}" style="color:${hoursColor(logged)}">${logged===0?'休':logged+'h'}</span>`;
+      // 色柱颜色与右上角小时文字一致：0=红 8=绿 10=蓝 11=紫，其余灰
       const bw = 70;
-      const bc = logged>0 ? '#52c41a' : '#f5222d';
+      const bc = hoursColor(logged);
       inner += `<span class="day-bar" style="width:${bw}%;background:${bc}"></span>`;
     }
     cells.push(`<td class="${cls.trim()}" data-y="${y}" data-m="${m}" data-d="${d}">${inner}</td>`);
@@ -515,8 +699,7 @@ function renderPanel(el, y, m){
 }
 
 let cur = { y: TODAY.y, m: TODAY.m };
-// 可连选规则：仅「今天所在的月份」整月可连选（如 10 月只有 10 月可点）。
-// 翻到上月/下月均不可点击；进入新月份后自动切换为新的当月可点。
+// 可连选规则：已取消月份限制 —— 当前显示的任意月份、任意日期都可点击连选。
 // dayStart：把日期「零点化」，避免时分秒与跨月/跨年误差
 function dayStart(dt){ return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime(); }
 const track = document.getElementById('track');
@@ -590,7 +773,7 @@ window.addEventListener('mousemove', e=> onMove(e.clientX, e.clientY));
 window.addEventListener('mouseup', e=> onEnd(e.clientX));
 
 // ============ 批量连选 & 一次性设置工时 ============
-// 交互：点击日期 = 选中/取消（可连选多个），选好后点击「保存」一次性写入所有选中日期。
+// 交互：点击日期 = 选中/取消（可连选多个，任意月份均可），选好后点击「保存」一次性写入所有选中日期。
 const selectedTs = new Set();   // 已选日期集合（存 dayStart 时间戳，跨月/跨年安全）
 const batchBar   = document.getElementById('batchBar');
 const batchCount = document.getElementById('batchCount');
@@ -598,9 +781,19 @@ const batchRange = document.getElementById('batchRange');
 const batchInput = document.getElementById('batchInput');
 const batchMsg   = document.getElementById('batchMsg');
 const batchQuick = document.getElementById('batchQuick');
-const batchSave  = document.getElementById('batchSave');
+const batchClose = document.getElementById('batchClose');
+function showBatchPopup(){ batchBar.classList.add('show'); }
+function hideBatchPopup(){ batchBar.classList.remove('show'); }
 const batchDel   = document.getElementById('batchDel');
+const batchHoliday = document.getElementById('batchHoliday');
 let batchHideTimer = null;
+// 弹窗内「待保存」的标记意图：true=设为, false=取消, null=不改变
+let pendHoliday = null, pendNormal = null;
+function resetPendingMarks(){
+  pendHoliday = null; pendNormal = null;
+  if(batchHoliday){ batchHoliday.classList.remove('on'); batchHoliday.textContent = '节假日'; }
+  if(batchNormal){ batchNormal.classList.remove('on'); batchNormal.textContent = '正常工作日'; }
+}
 
 function selectedDates(){
   return [...selectedTs].sort((a,b)=>a-b).map(ts=>{
@@ -618,8 +811,23 @@ function scheduleBatchHide(){
   batchHideTimer = setTimeout(()=>{
     batchHideTimer = null;
     batchMsg.textContent = '';
-    if(!selectedTs.size) batchBar.classList.remove('show');
+    if(!selectedTs.size) hideBatchPopup();
   }, 2000);
+}
+
+// 关闭弹窗：清空选择并隐藏
+function closeBatchPopup(){
+  clearTimeout(batchHideTimer); batchHideTimer = null;
+  selectedTs.clear();
+  resetPendingMarks();
+  fillPanels();
+  hideBatchPopup();
+  batchMsg.textContent = '';
+  batchCount.textContent = '0';
+  batchRange.textContent = '';
+}
+if(batchClose){
+  batchClose.addEventListener('click', closeBatchPopup);
 }
 
 // 保存/清除成功后选择已清空：计数与范围归零，但保留成功提示 2 秒
@@ -635,10 +843,35 @@ function updateBatchBar(){
     const ds = selectedDates();
     batchRange.textContent = ds.length > 1
       ? `（${ds[0].m}/${ds[0].d} ~ ${ds[ds.length-1].m}/${ds[ds.length-1].d}）` : '';
-    batchBar.classList.add('show');
+    showBatchPopup();
+    syncBatchHoliday();
+    syncBatchNormal();
   }else if(!batchHideTimer){
-    batchBar.classList.remove('show');
+    hideBatchPopup();
     batchMsg.textContent = '';
+  }
+}
+
+// 假日按钮状态：根据选中日期现状初始化「待保存」意图
+function syncBatchHoliday(){
+  if(!batchHoliday) return;
+  const ds = selectedDates();
+  const allHoli = ds.length > 0 && ds.every(o=>isHoliday(o.y,o.m,o.d));
+  // 已存待保存意图时不覆盖
+  if(pendHoliday === null){
+    batchHoliday.classList.toggle('on', allHoli);
+    batchHoliday.textContent = allHoli ? '🚫 取消节假日' : '节假日';
+  }
+}
+
+// 正常按钮状态：根据选中日期现状初始化「待保存」意图
+function syncBatchNormal(){
+  if(!batchNormal) return;
+  const ds = selectedDates();
+  const allNorm = ds.length > 0 && ds.every(o=>isNormalMark(o.y,o.m,o.d));
+  if(pendNormal === null){
+    batchNormal.classList.toggle('on', allNorm);
+    batchNormal.textContent = allNorm ? '🚫 取消正常工作日' : '正常工作日';
   }
 }
 
@@ -654,9 +887,6 @@ function syncBatchQuick(){
     b.classList.toggle('active', b.dataset.h === String(v));
   });
 }
-batchQuick.querySelectorAll('button').forEach(btn=>{
-  btn.addEventListener('click', ()=>{ batchInput.value = btn.dataset.h; syncBatchQuick(); });
-});
 batchInput.addEventListener('input', ()=>{
   const clean = batchInput.value.replace(/[^0-9.]/g,'').replace(/(\..*)\./g,'$1');
   if(clean !== batchInput.value) batchInput.value = clean;
@@ -670,44 +900,119 @@ track.addEventListener('click', e=>{
   const y=+td.dataset.y, m=+td.dataset.m, d=+td.dataset.d;
   if(!(y && m && d)) return;
   const ts = dayStart(new Date(y, m-1, d));
-  // 仅「今天所在的月份」整月可连选；上月/下月等其他月份点击静默不响应
-  if(!(y===TODAY.y && m===TODAY.m)) return;
+  // 已取消月份限制：当前显示的任意月份、任意日期均可点击连选
   if(selectedTs.has(ts)){ selectedTs.delete(ts); td.classList.remove('sel'); }
   else { selectedTs.add(ts); td.classList.add('sel'); }
   updateBatchBar();
 });
 
-// 保存：把输入的工时一次性写入所有选中日期（单次云端请求）
-batchSave.addEventListener('click', async ()=>{
+// 单日快捷：双击（桌面）/ 长按（手机）任意日期 = 直接切换该日「节假日」标记
+let _pressTimer = null, _pressTd = null, _longPressed = false;
+function toggleOneDayHoliday(td){
+  const y=+td.dataset.y, m=+td.dataset.m, d=+td.dataset.d;
+  if(!(y && m && d)) return;
+  const on = !isHoliday(y,m,d);
+  memoryHolidays[holidayKey(y,m,d)] = on;
+  if(!on) delete memoryHolidays[holidayKey(y,m,d)];
+  fillPanels();
+  showBatchMsg(on ? `✅ ${m}/${d} 已标记为节假日` : `✅ ${m}/${d} 已取消节假日`, true);
+  showBatchPopup();
+  scheduleBatchHide();
+  saveHolidaysCloud();
+}
+track.addEventListener('dblclick', e=>{
+  const td = e.target.closest('td');
+  if(!td || td.classList.contains('empty')) return;
+  e.preventDefault();
+  toggleOneDayHoliday(td);
+});
+track.addEventListener('touchstart', e=>{
+  const td = e.target.closest('td');
+  if(!td || td.classList.contains('empty')) return;
+  _pressTd = td; _longPressed = false;
+  clearTimeout(_pressTimer);
+  _pressTimer = setTimeout(()=>{
+    _longPressed = true;
+    toggleOneDayHoliday(_pressTd);
+    if(navigator.vibrate) try{ navigator.vibrate(30); }catch(err){}
+  }, 600);
+}, {passive:true});
+track.addEventListener('touchend', ()=>{
+  clearTimeout(_pressTimer);
+  if(_longPressed){
+    // 抑制长按后触发的 click（避免误选当天）
+    justDragged = true;
+    setTimeout(()=>justDragged=false, 350);
+  }
+}, {passive:true});
+track.addEventListener('touchmove', ()=>{ clearTimeout(_pressTimer); }, {passive:true});
+
+// 保存：把输入的工时 + 假日/正常标记 一次性写入所有选中日期（单次云端请求）
+async function saveBatchHours(extraTip){
   if(!selectedTs.size) return;
   const raw = batchInput.value.trim();
   const v = parseFloat(raw);
-  if(raw==='' || isNaN(v) || v<0){ showBatchMsg('⚠️ 请输入有效工时（0-24）', false); return; }
-  const val = Math.min(v, 24);
+  const hasHours = !(raw==='' || isNaN(v) || v<0);
+  const hasMark  = (pendHoliday !== null) || (pendNormal !== null);
+  if(!hasHours && !hasMark){
+    showBatchMsg('⚠️ 请先选择小时或节假日/正常工作日', false); return;
+  }
+  const val = hasHours ? Math.min(v, 24) : null;
   const ds = selectedDates();
-  for(const o of ds){ memoryWorklog[key(o.y,o.m,o.d)] = val; }
-  batchSave.disabled = true;
+  for(const o of ds){
+    const k = key(o.y,o.m,o.d), hk = holidayKey(o.y,o.m,o.d);
+    if(val !== null) memoryWorklog[k] = val;
+    // 应用假日意图
+    if(pendHoliday === true){ memoryHolidays[hk] = true; delete memoryNormals[hk]; }
+    else if(pendHoliday === false){ delete memoryHolidays[hk]; }
+    // 应用正常意图
+    if(pendNormal === true){ memoryNormals[hk] = true; delete memoryHolidays[hk]; }
+    else if(pendNormal === false){ delete memoryNormals[hk]; }
+  }
   showBatchMsg('保存中…', true);
   const ok = await saveWholeWorklogCloud();
-  batchSave.disabled = false;
   if(ok){
     const n = ds.length;
+    const bits = [];
+    if(val !== null) bits.push(`${val} 小时`);
+    if(pendHoliday === true) bits.push('节假日');
+    if(pendHoliday === false) bits.push('取消节假日');
+    if(pendNormal === true) bits.push('正常工作日');
+    if(pendNormal === false) bits.push('取消正常工作日');
     selectedTs.clear();
+    resetPendingMarks();
     fillPanels();
     resetBatchCounts();
-    showBatchMsg(`✅ 已为 ${n} 天设置 ${val} 小时`, true);
+    showBatchMsg(`✅ ${extraTip || '保存成功'}：${n} 天已设置 ${bits.join('、')}`, true);
     scheduleBatchHide();
   }else{
     showBatchMsg('❌ 云端保存失败，请重试', false);
   }
+}
+// 快捷数字：仅选中（填入输入框并高亮），点「保存」按钮或回车才保存
+batchQuick.querySelectorAll('button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{ batchInput.value = btn.dataset.h; syncBatchQuick(); });
+});
+// 保存按钮：把选中的工时写入所有选中日期
+const batchSaveBtn = document.getElementById('batchSaveBtn');
+if(batchSaveBtn){
+  batchSaveBtn.addEventListener('click', ()=>saveBatchHours('保存成功'));
+}
+// 输入框回车保存
+batchInput.addEventListener('keydown', e=>{
+  if(e.key === 'Enter'){ e.preventDefault(); saveBatchHours(); }
 });
 
-// 清除记录：删除所有选中日期的考勤记录
+// 清除记录：点击后立即清除所有选中日期（工时 + 节假日 + 正常工作日），无需确认
 batchDel.addEventListener('click', async ()=>{
   if(!selectedTs.size) return;
   const ds = selectedDates();
-  if(!confirm(`确定清除已选 ${ds.length} 天的考勤记录吗？`)) return;
-  for(const o of ds){ delete memoryWorklog[key(o.y,o.m,o.d)]; }
+  for(const o of ds){
+    const k = key(o.y,o.m,o.d);
+    delete memoryWorklog[k];
+    delete memoryHolidays[holidayKey(o.y,o.m,o.d)];
+    delete memoryNormals[holidayKey(o.y,o.m,o.d)];
+  }
   batchDel.disabled = true;
   showBatchMsg('清除中…', true);
   const ok = await saveWholeWorklogCloud();
@@ -715,26 +1020,123 @@ batchDel.addEventListener('click', async ()=>{
   if(ok){
     const n = ds.length;
     selectedTs.clear();
+    resetPendingMarks();
     fillPanels();
     resetBatchCounts();
-    showBatchMsg(`✅ 已清除 ${n} 天记录`, true);
+    showBatchMsg(`✅ 已清除 ${n} 天记录（工时、节假日、正常工作日）`, true);
     scheduleBatchHide();
   }else{
     showBatchMsg('❌ 云端保存失败，请重试', false);
   }
 });
 
+// 节假日/正常工作日：仅切换「待保存」状态，实际写入在点「保存」时统一提交
+if(batchHoliday){
+  batchHoliday.addEventListener('click', ()=>{
+    if(!selectedTs.size) return;
+    const ds = selectedDates();
+    // 当前所有选中日的实际状态，用于推断下一步意图
+    const allHoli = ds.every(o=>isHoliday(o.y,o.m,o.d));
+    const cur = (pendHoliday === null) ? allHoli : pendHoliday;   // 当前生效态
+    pendHoliday = !cur;
+    batchHoliday.classList.toggle('on', pendHoliday);
+    batchHoliday.textContent = pendHoliday ? '节假日 ✓' : '🚫 取消节假日';
+    if(pendHoliday) resetPendingNormal();   // 节假日与正常工作日互斥
+    showBatchMsg(pendHoliday ? '已选「节假日」，点保存生效' : '已选「取消节假日」，点保存生效', true);
+    clearTimeout(batchHideTimer); batchHideTimer = null;
+  });
+}
+
+// 正常工作日：仅切换「待保存」状态
+if(batchNormal){
+  batchNormal.addEventListener('click', ()=>{
+    if(!selectedTs.size) return;
+    const ds = selectedDates();
+    const allNorm = ds.every(o=>isNormalMark(o.y,o.m,o.d));
+    const cur = (pendNormal === null) ? allNorm : pendNormal;
+    pendNormal = !cur;
+    batchNormal.classList.toggle('on', pendNormal);
+    batchNormal.textContent = pendNormal ? '正常工作日 ✓' : '🚫 取消正常工作日';
+    if(pendNormal) resetPendingHoliday();
+    showBatchMsg(pendNormal ? '已选「正常工作日」，点保存生效' : '已选「取消正常工作日」，点保存生效', true);
+    clearTimeout(batchHideTimer); batchHideTimer = null;
+  });
+}
+
+function resetPendingHoliday(){
+  pendHoliday = null;
+  if(batchHoliday){ batchHoliday.classList.remove('on'); batchHoliday.textContent = '节假日'; }
+}
+function resetPendingNormal(){
+  pendNormal = null;
+  if(batchNormal){ batchNormal.classList.remove('on'); batchNormal.textContent = '正常工作日'; }
+}
+
 function updateStats(){
   const y=cur.y, m=cur.m;
-  const st = monthStats(y,m);
   const monthCn = MONTHS[m-1];
   const daysInMonth = new Date(y, m, 0).getDate();   // 当月总天数
   window._currentBarkTitle = `【${monthCn}考勤-共${daysInMonth}天】`;
-  window._currentBarkBody = `工作 ${st.cnt} 天・休息 ${st.rest} 天・合计 ${st.total} 小时`;
+  // 按工时值统计天数：休息(0) / 8小时 / 10小时 / 11小时 / 其他
+  const hourDays = {};   // 值 -> 天数
+  let loggedTotal = 0;
+  for(let d=1; d<=daysInMonth; d++){
+    const v = getLog(y,m,d);
+    if(v===null) continue;
+    loggedTotal++;
+    const k = (v===0) ? '休息' : (Number.isInteger(v) ? String(v)+'小时' : v+'小时');
+    hourDays[k] = (hourDays[k]||0) + 1;
+  }
+  // 固定顺序：休息 -> 8 -> 10 -> 11 -> 其他按数值升序
+  const order = ['休息','8小时','10小时','11小时'];
+  const parts = [];
+  for(const k of order){ if(hourDays[k]) parts.push(`${k}：${hourDays[k]} 天`); }
+  for(const k of Object.keys(hourDays).sort((a,b)=>{
+    const na=parseFloat(a), nb=parseFloat(b);
+    return (isNaN(na)||isNaN(nb)) ? a.localeCompare(b) : na-nb;
+  })){ if(!order.includes(k)) parts.push(`${k}：${hourDays[k]} 天`); }
+  const statLine = parts.length ? parts.join('，') : '暂无记录';
+  window._currentBarkBody = statLine;
+
+  // ---- 加班/双休日/节假日 三类汇总 + 计算公式 ----
+  const WORK_HOURS = 8;
+  let weekdayDays = 0, overtimeHours = 0, overtimeDays = 0;
+  let weekendHours = 0, weekendDays = 0, holiHours = 0, holiDays = 0;
+  for(let d=1; d<=daysInMonth; d++){
+    const dow = (new Date(y,m-1,d).getDay()+6)%7;   // 0=周一
+    const isWeekend = dow>=5;
+    const isHoli = isHoliday(y,m,d);
+    const isNorm = !isHoli && isNormalMark(y,m,d);
+    if(dow<5) weekdayDays++;
+    const v = getLog(y,m,d);
+    if(v===null) continue;
+    if(isHoli){
+      if(v>0){ holiHours += v; holiDays++; }
+    }else if(isNorm){
+      if(v>WORK_HOURS){ overtimeHours += v-WORK_HOURS; overtimeDays++; }
+    }else if(isWeekend){
+      if(v>0){ weekendHours += v; weekendDays++; }
+    }else{
+      if(v>WORK_HOURS){ overtimeHours += v-WORK_HOURS; overtimeDays++; }
+    }
+  }
+  // ---- Bark 推送正文：正常工作日 / 双休日 / 节假日 / 休息 ----
+  const restDays = hourDays['休息'] || 0;
+  window._currentBarkBody = `正常工作日 ${overtimeDays} 天，实际加班 ${overtimeHours} 小时\n`
+    + `* 双休日 ${weekendHours} 小时\n`
+    + `* 节假日 ${holiHours} 小时\n`
+    + `* 休息 ${restDays} 天`;
+  // 一行式图例：小方块 + 名称 + 天数/小时数（数值随后面考勤表格同步）
+  const statExtra = `<div class="stat-legend-one">`
+    + `<span class="legend-cell"><span class="stat-sq"></span>正常工作日 ${overtimeDays} 天，实际加班 ${overtimeHours} 小时</span>`
+    + `<span class="legend-cell"><span class="stat-sq-org"></span>节假日 ${holiDays} 天，${holiHours} 小时</span>`
+    + `<span class="legend-cell"><span class="stat-sq-pur"></span>双休日 ${weekendDays} 天，${weekendHours} 小时</span>`
+    + `<span class="legend-cell"><span class="stat-sq-red"></span>休息 ${hourDays['休息']||0} 天</span>`
+    + `</div>`;
+
   const el = document.getElementById('stats');
   if(el){
-    el.innerHTML = '<div class="legend-row"><div class="legend-item"><div class="legend-bar seg-green"></div><span class="legend-txt">工作</span></div><div class="legend-item"><div class="legend-bar seg-red"></div><span class="legend-txt">休息</span></div></div>'
-      + `<div>工作 <span class="num-green">${st.cnt}</span> 天・休息 <span class="num-red">${st.rest}</span> 天・合计 <span class="num-purple">${st.total}</span> 小时</div>`;
+    el.innerHTML = statExtra;
   }
 }
 
@@ -1111,18 +1513,71 @@ async function enterApp(){
     const y=viewCur.y, m=viewCur.m;
     const totalDays = new Date(y,m,0).getDate();
     const WEEK=["一","二","三","四","五","六","日"];
-    let totalHours=0, workDays=0, restDays=0, weekdayHours=0, weekendHours=0;
+    const WORK_HOURS = 8;   // 每日标准工时，用于折算实际加班
+    // 工作日 = 当月「周一~周五」的天数（与是否填写工时无关）；双休日 = 周六 + 周日天数
+    let weekdayDays=0, restDaysInMonth=0;
+    let totalHours=0, workDays=0, restDays=0, weekendHours=0;
+    let holiHours=0;
     let dateCells='', weekCells='', hourCells='';
     for(let d=1; d<=totalDays; d++){
       const date = new Date(y, m-1, d);
       const dow = (date.getDay()+6)%7; // 0=周一
       const isWeekend = date.getDay()%6===0; // 周六或周日
-      dateCells += `<td${isWeekend?' class="sat"':''}>${d}</td>`;
+      const isHoli = isHoliday(y,m,d);
+      const isNorm = !isHoli && isNormalMark(y,m,d);
+      // 星期一到星期五计为工作日，星期六/星期日计为双休日（休息天不算入工作日）
+      if(dow<5) weekdayDays++; else restDaysInMonth++;
+      const _dl = getLog(y,m,d);
+      // 与日历同款分类：节假日 > 正常 > 加班(>8) > 休息(0) > 双休日
+      const _wday = dow<5;
+      let _fill = '';
+      if(isHoli) _fill = ' holiday-cell';
+      else if(isNorm) _fill = ' has-norm-green';
+      else if(_dl!==null && _dl>8 && _wday) _fill = ' has-ot';
+      else if(_dl!==null && _dl===0) _fill = ' has-rest';
+      else if(isWeekend && _dl!==null) _fill = ' has-weekend';
+      dateCells += `<td class="${isWeekend?'sat':''}${_fill}">`
+        + (isHoli ? '<span class="holi-tag">假</span>' : (isNorm ? '<span class="norm-tag">正</span>' : '')) + d + '</td>';
       weekCells += `<td${isWeekend?' class="sun"':''}>${WEEK[dow]}</td>`;
       const v = getLog(y,m,d);
-      if(v===null) hourCells += '<td></td>';
-      else if(v>0){ hourCells += `<td class="work">${v}</td>`; totalHours += v; workDays++; if(dow<5) weekdayHours += v; else weekendHours += v; }
-      else { hourCells += '<td class="rest">休</td>'; restDays++; }
+      if(v===null){
+        hourCells += `<td${_fill}>${isHoli?'假':''}</td>`;
+      }else if(v>0){
+        hourCells += `<td class="${_fill.trim()} work">${v}</td>`;
+        totalHours += v; workDays++;
+        // 分类互斥：节假日优先 → 正常标记 → 星期六日 → 星期一~五
+        if(isHoli){ holiHours += v; }
+        else if(isNorm){ /* 正常：强制按周一~五算法，计加班，不计双休日 */ }
+        else if(isWeekend){ weekendHours += v; }
+      }else{
+        hourCells += `<td class="${_fill.trim()} rest">休</td>`; restDays++;
+      }
+    }
+    // 实际加班 = 「正常标记的日期 + 星期一~五（排除节假日）」每天 (工时 - 8) 的总和（不足8小时不计入）
+    let overtimeHours = 0, overtimeDays = 0, weekendDays = 0, holiDaysWithHours = 0;
+    for(let d=1; d<=totalDays; d++){
+      const dow = (new Date(y,m-1,d).getDay()+6)%7;
+      const isHoli = isHoliday(y,m,d);
+      const isNorm = !isHoli && isNormalMark(y,m,d);
+      if(isHoli) continue;                 // 节假日整体排除
+      if(dow>=5 && !isNorm) continue;      // 星期六日（除非标了正常 → 按周一~五算）
+      const v = getLog(y,m,d);
+      if(v!==null && v>WORK_HOURS){ overtimeHours += (v - WORK_HOURS); overtimeDays++; }
+    }
+    // 双休日 = 星期六日已填工时（节假日与正常标记的日期不归入双休日）；天数 = 其中有工时的周六日
+    const weekendNet = weekendHours;
+    for(let d=1; d<=totalDays; d++){
+      const dow = (new Date(y,m-1,d).getDay()+6)%7;
+      if(dow<5) continue;
+      if(isHoliday(y,m,d) || isNormalMark(y,m,d)) continue;
+      const v = getLog(y,m,d);
+      if(v!==null && v>0) weekendDays++;
+    }
+    // 节假日天数 = 标了「假」且填了工时的天数
+    for(let d=1; d<=totalDays; d++){
+      if(!isHoliday(y,m,d)) continue;
+      const v = getLog(y,m,d);
+      if(v!==null && v>0) holiDaysWithHours++;
     }
     document.getElementById('printTitle').textContent = y + '年' + m + '月考勤';
     const html = `<div class="a4-holder"><div class="a4-sheet">`
@@ -1131,16 +1586,24 @@ async function enterApp(){
       + `<th class="row-head">项目</th>${dateCells}<th class="sum-head">合计工时</th>`
       + `</tr></thead><tbody>`
       + `<tr><th class="row-head">星期</th>${weekCells}<td class="sum-head"></td></tr>`
-      + `<tr><th class="row-head">工时</th>${hourCells}<td class="sum-cell">${totalHours}</td></tr>`
+      + `<tr><th class="row-head">工时</th>${hourCells}<td class="sum-cell" rowspan="2">${totalHours}</td></tr>`
       + `</tbody></table>`
-      + `<div class="a4-sub">提示：工作日 ${weekdayHours} 小时　双休日 ${weekendHours} 小时</div>`
+      + `<div class="a4-foot-note">`
+      + `<div>* 正常工作日 ${overtimeDays} 天，实际加班 ${overtimeHours} 小时（工作日每天超过8小时的部分相加）</div>`
+      + `<div>* 双休日 ${weekendNet} 小时（周六日填写的工时直接相加）　${weekendDays} 天</div>`
+      + (holiHours > 0 ? `<div>* 节假日 ${holiHours} 小时（标记「假」的日子工时直接相加）　${holiDaysWithHours} 天</div>` : '')
+      + `<div>* 休息 ${restDays} 天（当日工时记为 0）</div>`
+      + `</div>`
       + `</div></div>`;
     document.getElementById('printSheet').innerHTML = html;
     // 同步 Bark 推送标题/正文，使第二页翻月后发送的内容与当前查看月份一致
     const daysInMonth = new Date(y, m, 0).getDate();
     const MONTHS = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
     window._currentBarkTitle = `【${MONTHS[m-1]}考勤-共${daysInMonth}天】`;
-    window._currentBarkBody = `工作 ${workDays} 天・休息 ${restDays} 天・合计 ${totalHours} 小时`;
+    window._currentBarkBody = `正常工作日 ${overtimeDays} 天，实际加班 ${overtimeHours} 小时\n`
+      + `* 双休日 ${weekendNet} 小时\n`
+      + `* 节假日 ${holiHours} 小时\n`
+      + `* 休息 ${restDays} 天`;
   }
 
   document.getElementById('exportBtn').addEventListener('click', ()=>{
@@ -1198,7 +1661,11 @@ function exportMonthXlsx(y, m){
     + '<c r="B1" s="1" t="s"><v>'+titleSi+'</v></c>';
   for(let i=2; i<dayCols; i++) row1 += '<c r="'+colOf(i)+'1" s="1"/>';
   let row2 = '<c r="A2" s="2" t="s"><v>'+siDate+'</v></c>';
-  for(let d=1; d<=totalDays; d++) row2 += '<c r="'+colOf(d)+'2" s="2"><v>'+d+'</v></c>';
+  for(let d=1; d<=totalDays; d++){
+    const L = colOf(d);
+    if(isHoliday(y,m,d)) row2 += '<c r="'+L+'2" s="8"><v>'+d+'</v></c>';
+    else                 row2 += '<c r="'+L+'2" s="2"><v>'+d+'</v></c>';
+  }
   row2 += '<c r="'+sumColL+'2" s="2" t="s"><v>'+siSum+'</v></c>';
   let row3 = '<c r="A3" s="3" t="s"><v>'+siWeek+'</v></c>';
   for(let d=1; d<=totalDays; d++) row3 += '<c r="'+colOf(d)+'3" s="3" t="s"><v>'+weekSi(getWeekCn(y,m,d))+'</v></c>';
@@ -1233,28 +1700,30 @@ function exportMonthXlsx(y, m){
   // ---- 样式：表头/日期行浅蓝底粗体、星期行红字、工时行按index风格绿(有)红(休)橙(空) ----
   const stylesXml='<?xml version="1.0" encoding="UTF-8"?>\n'
     +'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">\n'
-    +'  <fonts count="6">\n'
+    +'  <fonts count="7">\n'
     +'    <font><sz val="11"/><color theme="1"/><name val="宋体"/><charset val="134"/></font>\n'
     +'    <font><sz val="11"/><color rgb="FF1677FF"/><name val="宋体"/><charset val="134"/></font>\n'
     +'    <font><b/><sz val="11"/><name val="宋体"/><charset val="134"/></font>\n'
     +'    <font><b/><sz val="11"/><color rgb="FFC00000"/><name val="宋体"/><charset val="134"/></font>\n'
     +'    <font><b/><sz val="11"/><color rgb="FF52C41A"/><name val="宋体"/><charset val="134"/></font>\n'
     +'    <font><b/><sz val="11"/><color rgb="FFF5222D"/><name val="宋体"/><charset val="134"/></font>\n'
+    +'    <font><b/><sz val="11"/><color rgb="FFFA8C16"/><name val="宋体"/><charset val="134"/></font>\n'
     +'  </fonts>\n'
-    +'  <fills count="6">\n'
+    +'  <fills count="7">\n'
     +'    <fill><patternFill patternType="none"/></fill>\n'
     +'    <fill><patternFill patternType="gray125"/></fill>\n'
     +'    <fill><patternFill patternType="solid"><fgColor rgb="FFD9E1F2"/><bgColor indexed="64"/></patternFill></fill>\n'
     +'    <fill><patternFill patternType="solid"><fgColor rgb="FFFCE4D6"/><bgColor indexed="64"/></patternFill></fill>\n'
     +'    <fill><patternFill patternType="solid"><fgColor rgb="FFF6FFED"/><bgColor indexed="64"/></patternFill></fill>\n'
     +'    <fill><patternFill patternType="solid"><fgColor rgb="FFFFF1F0"/><bgColor indexed="64"/></patternFill></fill>\n'
+    +'    <fill><patternFill patternType="solid"><fgColor rgb="FFFFF3E0"/><bgColor indexed="64"/></patternFill></fill>\n'
     +'  </fills>\n'
     +'  <borders count="2">\n'
     +'    <border><left/><right/><top/><bottom/><diagonal/></border>\n'
     +'    <border><left style="thin"><color rgb="FFBFBFBF"/></left><right style="thin"><color rgb="FFBFBFBF"/></right><top style="thin"><color rgb="FFBFBFBF"/></top><bottom style="thin"><color rgb="FFBFBFBF"/></bottom><diagonal/></border>\n'
     +'  </borders>\n'
     +'  <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>\n'
-    +'  <cellXfs count="8">\n'
+    +'  <cellXfs count="9">\n'
     +'    <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>\n'
     +'    <xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>\n'
     +'    <xf numFmtId="0" fontId="2" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>\n'
@@ -1263,6 +1732,7 @@ function exportMonthXlsx(y, m){
     +'    <xf numFmtId="0" fontId="4" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>\n'
     +'    <xf numFmtId="0" fontId="5" fillId="5" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>\n'
     +'    <xf numFmtId="0" fontId="2" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>\n'
+    +'    <xf numFmtId="0" fontId="6" fillId="6" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>\n'
     +'  </cellXfs>\n'
     +'  <cellStyles count="1"><cellStyle name="常规" xfId="0" builtinId="0"/></cellStyles>\n'
     +'</styleSheet>';
